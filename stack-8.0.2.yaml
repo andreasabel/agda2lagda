@@ -1,0 +1,8 @@
+resolver: lts-9.21
+compiler: ghc-8.0.2
+compiler-check: match-exact
+
+# Local packages, usually specified by relative directory name
+packages:
+- '.'
+

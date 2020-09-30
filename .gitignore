@@ -1,3 +1,5 @@
 /test/Foo.lagda.tex
 /dist/
 /dist-*/
+/.stack-work
+/stack-*.yaml.lock

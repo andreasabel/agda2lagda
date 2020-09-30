@@ -1,0 +1,18 @@
+resolver: ghc-8.10.2
+compiler: ghc-8.10.2
+compiler-check: match-exact
+
+extra-deps:
+- ansi-terminal-0.10.3
+- ansi-wl-pprint-0.6.9
+- colour-2.3.5
+- optparse-applicative-0.16.0.0
+- transformers-compat-0.6.5
+
+flags:
+  transformers-compat:
+    five-three: true
+
+packages:
+- '.'
+
