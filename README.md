@@ -88,3 +88,36 @@ module Submodule where
 That's it.
 Bye.
 ```
+
+## Installation
+
+Last update of installation instructions: 2020-09-30.
+
+### From hackage.haskell.org
+
+Requires GHC >= 8.0 and the Haskell Cabal.
+```
+cabal install agda2lagda
+```
+
+### From the repository
+
+```
+git clone https://github.com/andreasabel/agda2lagda.git
+cd agda2lagda
+cabal install
+```
+Alternatively to the last line, you can use `stack`.
+E.g. if you have GHC 8.10.2 installed, you can use this compiler as follows:
+```
+stack install --system-ghc --stack-yaml stack-8.10.2.yaml
+```
+Alternatively, `stack` can install the compiler for you:
+```
+stack install --stack-yaml stack-xx.yy.zz.yaml
+```
+The `xx.yy.zz` is a placeholder for the GHC version,
+choose one (for which there is a `.yaml` file).
+
+At the time of writing, installation with these GHC versions has been tested:
+8.0.2, 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.2.
