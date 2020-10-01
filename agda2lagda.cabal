@@ -26,6 +26,7 @@ extra-source-files:  CHANGELOG.md
                      README.md
                      Makefile
                      test/Foo.agda
+                     test/ClosingCommentInString.agda
 
 tested-with:         GHC == 8.0.2
                      GHC == 8.2.2

@@ -165,7 +165,7 @@ parseLine ind = \case
   -- Commenting out
   '{':'-':s | ind == 0, take 1 s /= "#"
             -> first (CommentedOut . dropOneSpace . reverse . trimLeft) $
-                 parseBlockComment 0 [] s
+                 parseBlockComment False 0 [] s
 
   -- Line comment to text; ingore block comments here
   '-':'-':s -> first (TextLine ind . dropOneSpace . reverse . trimLeft) $
@@ -182,7 +182,20 @@ parseLine ind = \case
 
 -- | Parse to the end of the line (unless block comment opens; then include it).
 
-parseToEOL :: RespectBlockComment -> RevString -> String -> (RevString, String)
+parseToEOL
+  :: RespectBlockComment
+     -- ^ How should we treat a block commenting opening?
+     --
+     --   If 'False', ignore it and treat it as ordinary text
+     --   (e.g. if inside a line comment).
+     --
+     --   If 'True', respect it: look for the matching closing
+     --   and continue after that.
+     --
+     --   In any case, do not discard the delimiter(s)!
+  -> RevString
+  -> String
+  -> (RevString, String)
 parseToEOL b acc = \case
 
   -- Reached end of line (EOL).
@@ -192,7 +205,8 @@ parseToEOL b acc = \case
   '\n':s        -> (acc, s)
 
   -- Skip over block comment.
-  '{':'-':s | b -> uncurry (parseToEOL b) $ parseBlockComment 0 acc s
+  '{':'-':s | b -> uncurry (parseToEOL b) $
+                     parseBlockComment True 0 ('-':'{':acc) s
 
   -- Skip over character.
   c:s           -> parseToEOL b (c:acc) s
@@ -200,25 +214,27 @@ parseToEOL b acc = \case
 -- | Skip over nested block comments.
 
 parseBlockComment
-  :: NestingLevel
+  :: Bool
+     -- ^ Include final closing block delimiter?
+  -> NestingLevel
   -> RevString
      -- ^ Accumulator, reversed.
   -> String
      -- ^ Input
   -> (RevString, String)
      -- ^ Block comment, reversed, containing inner comment delimiters and line breaks; output.
-parseBlockComment n acc = \case
+parseBlockComment b n acc = \case
 
   -- Close comment.
   '-':'}':s
-   | n <= 0    -> (acc, s)
-   | otherwise -> parseBlockComment (n - 1) ('}':'-':acc) s
+   | n <= 0    -> (if b then '}':'-':acc else acc, s)
+   | otherwise -> parseBlockComment b (n - 1) ('}':'-':acc) s
 
   -- Open comment.
-  '{':'-':s    -> parseBlockComment (n + 1) ('-':'{':acc) s
+  '{':'-':s    -> parseBlockComment b (n + 1) ('-':'{':acc) s
 
   []  -> (acc,[])
-  c:s -> parseBlockComment n (c:acc) s
+  c:s -> parseBlockComment b n (c:acc) s
 
 
 -- * Auxiliary functions.
