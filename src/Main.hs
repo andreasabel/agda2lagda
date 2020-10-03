@@ -19,7 +19,7 @@ import System.FilePath  (splitExtension, addExtension)
 import System.IO        (hPutStr, stderr)
 import System.Exit      (exitFailure)
 
-import Text.PrettyPrint.ANSI.Leijen (vcat, text)
+import Text.PrettyPrint.ANSI.Leijen (vcat, text, (<$$>))
 
 import LexicalStructure
 import Render
@@ -78,9 +78,9 @@ main = do
 -- * Option parsing and handling
 
 data Options = Options
-  { optForce      :: Bool
+  { optVerbose    :: Bool
   , optDryRun     :: Bool
-  , optVerbose    :: Bool
+  , optForce      :: Bool
   , optOutput     :: Maybe FilePath
   , optInput      :: Maybe FilePath
   } deriving Show
@@ -102,11 +102,13 @@ options =
     infoOption version
       $  long "numeric-version"
       <> help "Show just version number."
+      -- Newline at the end:
+      -- <> helpDoc (Just $ text "Show just version number." <$$> text "")
 
   programOptions = Options
-    <$> oForce
+    <$> oVerbose
     <*> oDryRun
-    <*> oVerbose
+    <*> oForce
     <*> oOutput
     <*> (oStdin <|> oInput)
 
