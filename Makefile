@@ -1,11 +1,12 @@
-.PHONY : bug haddock install test version
+.PHONY : bug haddock install test test-help version
+
+test-help:
+	cabal run agda2lagda -- --help
 
 version :
 	cabal run agda2lagda -- --version
 
-
 test :
-	cabal run agda2lagda -- --help
 	cabal run agda2lagda -- -v --force test/Foo.agda
 
 bug :

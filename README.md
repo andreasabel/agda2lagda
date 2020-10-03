@@ -1,6 +1,7 @@
-# agda2lagda: Convert Agda text to literate Agda text
 
-Generate a LaTeX literate Agda script from an Agda script.
+# agda2lagda: Convert Agda/Haskell text to literate Agda/Haskell text
+
+Generate a LaTeX literate Agda/Haskell script from an Agda/Haskell script.
 
 - Single line comments are turned into ordinary LaTeX.
 
@@ -8,7 +9,7 @@ Generate a LaTeX literate Agda script from an Agda script.
   These will be turned into TeX comments.
   Nested comments are recognized.
 
-- The rest is interpreted as Agda code and wrapped in a `code` environment.
+- The rest is interpreted as code and wrapped in a `code` environment.
 
 Example: `agda2lagda Foo.agda`
 

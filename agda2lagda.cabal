@@ -8,6 +8,7 @@ version:             0.2020.9.30
 synopsis:            Translate .agda files into .lagda.tex files.
 
 description:         Simple command line tool to convert plain Agda
+                     or Haskell
                      files into literate files.  Single line comments
                      are interpreted as text, the rest as code blocks.
 

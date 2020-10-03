@@ -10,6 +10,7 @@
 module Main where
 
 import Control.Monad
+import Data.List        (intercalate)
 import Data.Semigroup
 import Options.Applicative
 
@@ -26,6 +27,12 @@ import Version
 
 self :: String
 self = "agda2lagda"
+
+extensionMap :: [(String,String)]
+extensionMap =
+  [ (".agda" , ".lagda.tex")
+  , (".hs"   , ".lhs")
+  ]
 
 main :: IO ()
 main = do
@@ -70,10 +77,6 @@ main = do
 
 -- * Option parsing and handling
 
--- | The main operational modes.
--- data RunMode
-
-
 data Options = Options
   { optForce      :: Bool
   , optDryRun     :: Bool
@@ -86,7 +89,7 @@ options :: IO Options
 options =
   execParser $
     info (helper <*> versionOption <*> numericVersionOption <*> programOptions)
-         (header "Translates Agda text into literate Agda text, turning line comments into text and code into code blocks."
+         (header "Translates Agda/Haskell text into literate Agda/Haskell text, turning line comments into ordinary text and code into TeX code blocks."
           <> footerDoc (Just foot))
 
   where
@@ -134,24 +137,30 @@ options =
   oStdin =
     flag' Nothing
       $  long "stdin"
-      <> help "Read from standard input"
+      <> help "Read from standard input."
 
   oInput :: Parser (Maybe FilePath)
   oInput = dashToStdin <$> do
     strArgument
       $  metavar "INFILE"
-      <> help "The input file containing the Agda text."
+      <> help "The input file containing the Agda/Haskell text."
     where
     -- dash is interpreted as stdin
     dashToStdin = \case
           "-"  -> Nothing
           file -> Just file
 
-  foot = vcat $ map text
-    [ unwords [ "Example:", self, "path/to/file.agda" ]
-    , ""
-    , "This will write file path/to/file.lagda.tex unless it already exists."
-    , "To overwrite existing files, use option -f."
+  foot = vcat $ map text $ concat
+    [ [ "Unless explicitly given via -o, the name of the output file is computed by replacing the extension of the input file, according to the following rules:"
+      , "" ]
+    , flip map extensionMap $ \ (src, tgt) ->
+        intercalate "\t" [ "", src, "-->", tgt ]
+    , [ ""
+      , unwords [ "Example:", self, "path/to/file.agda" ]
+      , ""
+      , "This will write file path/to/file.lagda.tex unless it already exists."
+      , "To overwrite existing files, use option -f."
+      ]
     ]
 
 vocalizeOptions :: Options -> String
@@ -177,7 +186,8 @@ target (Options {..})
   | Just out <- optOutput = Just out
   | Just inp <- optInput  =
       case splitExtension inp of
-        (base, ".agda") -> Just $ addExtension base ".lagda.tex"
+        (base, src) | Just tgt <- lookup src extensionMap
+          -> Just $ addExtension base tgt
         _ -> Nothing
   | otherwise = Nothing
 
