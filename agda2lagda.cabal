@@ -40,6 +40,8 @@ executable agda2lagda
 
   other-modules:       LexicalStructure
                        Render
+                       Version
+                       Paths_agda2lagda
 
   -- other-extensions:
   build-depends:       base >=4.9 && < 5

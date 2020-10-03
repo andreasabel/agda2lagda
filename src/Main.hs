@@ -22,6 +22,10 @@ import Text.PrettyPrint.ANSI.Leijen (vcat, text)
 
 import LexicalStructure
 import Render
+import Version
+
+self :: String
+self = "agda2lagda"
 
 main :: IO ()
 main = do
@@ -62,7 +66,13 @@ main = do
 
   -- Done.
 
-  chat opts $ "agda2lagda terminated successfully.\n"
+  chat opts $ unwords [ self, "terminated successfully.\n" ]
+
+-- * Option parsing and handling
+
+-- | The main operational modes.
+-- data RunMode
+
 
 data Options = Options
   { optForce      :: Bool
@@ -75,12 +85,22 @@ data Options = Options
 options :: IO Options
 options =
   execParser $
-    info (helper <*> opts)
+    info (helper <*> versionOption <*> numericVersionOption <*> programOptions)
          (header "Translates Agda text into literate Agda text, turning line comments into text and code into code blocks."
           <> footerDoc (Just foot))
 
   where
-  opts = Options
+  versionOption =
+    infoOption (unwords [ self, "version", version ])
+      $  long "version"
+      <> help "Show version info."
+
+  numericVersionOption =
+    infoOption version
+      $  long "numeric-version"
+      <> help "Show just version number."
+
+  programOptions = Options
     <$> oForce
     <*> oDryRun
     <*> oVerbose
@@ -128,7 +148,7 @@ options =
           file -> Just file
 
   foot = vcat $ map text
-    [ "Example: agda2lagda path/to/file.agda"
+    [ unwords [ "Example:", self, "path/to/file.agda" ]
     , ""
     , "This will write file path/to/file.lagda.tex unless it already exists."
     , "To overwrite existing files, use option -f."
