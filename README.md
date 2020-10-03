@@ -91,6 +91,8 @@ Bye.
 
 ## Installation
 
+These are standard installation instructions.
+
 Last update of installation instructions: 2020-09-30.
 
 ### From hackage.haskell.org
@@ -122,11 +124,3 @@ choose one (for which there is a `.yaml` file).
 
 At the time of writing, installation with these GHC versions has been tested:
 8.0.2, 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.2.
-
-
-##  Known bugs
-
-Strings containing the closing comment delimiter "-}" confuse the
-lexer and may produce unexpected output.  At the time of writing, this
-is already a problem in Agda, see
-https://github.com/agda/agda/issues/4953.
