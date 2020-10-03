@@ -56,7 +56,6 @@ executable agda2lagda
 
   -- other-extensions:
   build-depends:       base >=4.9 && < 5
-                       , ansi-wl-pprint
                        -- , ansi-wl-pprint >= 0.6.7.3 && < 0.7
                        , directory
                        -- , directory >= 1.2.6.2 && < 1.4
