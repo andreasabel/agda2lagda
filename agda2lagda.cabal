@@ -11,12 +11,13 @@ description:         Simple command line tool to convert plain Agda
                      files into literate files.  Single line comments
                      are interpreted as text, the rest as code blocks.
 
--- bug-reports:
+homepage:            https://github.com/andreasabel/agda2lagda
+bug-reports:         https://github.com/andreasabel/agda2lagda/issues
 license:             PublicDomain
 license-file:        LICENSE
 
 author:              Andreas Abel
-maintainer:          andreas.abel@gu.se
+maintainer:          Andreas Abel <andreas.abel@cse.gu.se>
 copyright:           Andreas Abel, 2020
 category:            Dependent types
 
@@ -34,6 +35,15 @@ tested-with:         GHC == 8.0.2
                      GHC == 8.6.5
                      GHC == 8.8.4
                      GHC == 8.10.2
+
+source-repository head
+  type:     git
+  location: git://github.com/andreasabel/agda2lagda.git
+
+source-repository this
+  type:     git
+  location: git://github.com/andreasabel/agda2lagda.git
+  tag:      v0.2020.9.30
 
 executable agda2lagda
   main-is:             Main.hs
