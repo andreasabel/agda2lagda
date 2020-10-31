@@ -9,3 +9,5 @@
 /dist-*/
 /.stack-work
 /stack-*.yaml.lock
+/test/out/
+/test/Foo-generated.lagda

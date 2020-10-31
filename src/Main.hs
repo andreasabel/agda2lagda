@@ -5,24 +5,26 @@
 -- and wrap regular Agda code into code delimiters (\begin{code}...\end{code}).
 
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Main where
 
 import Control.Monad
-import Data.List        (intercalate)
+import qualified Data.List as List
 import Data.Semigroup
 
 import Options.Applicative
 import Options.Applicative.Help.Pretty (vcat, text) -- , (<$$>))
 
-import System.Directory (doesFileExist) -- getModificationTime
-import System.FilePath  (splitExtension, addExtension)
+import System.Directory (doesFileExist, doesDirectoryExist)
+import System.FilePath  (splitExtension, addExtension, takeFileName, (</>))
 import System.IO        (hPutStr, stderr)
 import System.Exit      (exitFailure)
 
 import LexicalStructure
 import Render
+import Util             ((<&>))
 import Version
 
 self :: String
@@ -40,7 +42,8 @@ main = do
   -- Parse options.
 
   opts@Options{..} <- options
-  chat opts $ vocalizeOptions opts
+  target <- getTarget opts
+  chat opts $ vocalizeOptions opts target
 
   -- Parse input.
 
@@ -54,7 +57,7 @@ main = do
   -- Save to file or print to stdout.
 
   chat opts $ "Writing output...\n"
-  case target opts of
+  case target of
     Nothing      -> putStr result
     Just outFile -> do
 
@@ -94,9 +97,13 @@ options =
 
   where
   versionOption =
-    infoOption (unwords [ self, "version", version ])
+    infoOption (unwords versionWords)
       $  long "version"
       <> help "Show version info."
+  versionWords = concat
+    [ [ self, "version", version ]
+    , [ "(Halloween edition)" | ".11.1" `List.isSuffixOf` version ]
+    ]
 
   numericVersionOption =
     infoOption version
@@ -133,8 +140,8 @@ options =
     optional $ strOption
       $  long "output"
       <> short 'o'
-      <> metavar "OUTFILE"
-      <> help "Name of output file."
+      <> metavar "OUT"
+      <> help "Name of output file or directory."
 
   oStdin =
     flag' Nothing
@@ -156,24 +163,32 @@ options =
     [ [ "Unless explicitly given via -o, the name of the output file is computed by replacing the extension of the input file, according to the following rules:"
       , "" ]
     , flip map extensionMap $ \ (src, tgt) ->
-        intercalate "\t" [ "", src, "-->", tgt ]
+        List.intercalate "\t" [ "", src, "-->", tgt ]
     , [ ""
+      , "If the path OUT given via -o is a directory, that's where the output file will be placed."
+      , ""
       , unwords [ "Example:", self, "path/to/file.agda" ]
       , ""
       , "This will write file path/to/file.lagda.tex unless it already exists."
       , "To overwrite existing files, use option -f."
+      , ""
+      , unwords [ "Example:", self, "path/to/file.hs", "-o out/dir" ]
+      , ""
+      , "This places the output in file out/dir/file.lhs."
       ]
     ]
 
-vocalizeOptions :: Options -> String
-vocalizeOptions o@(Options {..}) = unlines $ map concat
+type Target = Maybe FilePath
+
+vocalizeOptions :: Options -> Target -> String
+vocalizeOptions Options{..} target = unlines $ map concat
   [ [ "Plan:" ]
   , [ "- Read from "
     , maybe "standard input" ("file " ++) optInput
     , "."
     ]
   , [ "- Write to "
-    , maybe "standard output" (\ f -> "file " ++ f ++ unlessNewer) $ target o
+    , maybe "standard output" (\ f -> "file " ++ f ++ unlessNewer) target
     , "."
     ]
   ]
@@ -182,16 +197,27 @@ vocalizeOptions o@(Options {..}) = unlines $ map concat
     | optForce  = ""
     | otherwise = " (only if output is not newer than input)"
 
-target :: Options -> Maybe FilePath
-target (Options {..})
-  | optDryRun = Nothing
-  | Just out <- optOutput = Just out
-  | Just inp <- optInput  =
-      case splitExtension inp of
-        (base, src) | Just tgt <- lookup src extensionMap
-          -> Just $ addExtension base tgt
-        _ -> Nothing
-  | otherwise = Nothing
+getTarget :: Options -> IO Target
+getTarget Options{..}
+  | optDryRun = return Nothing
+  | otherwise = traverse dirOrFile optOutput <&> \ mout ->
+      if | Just (File out) <- mout -> Just out
+         | Just inp <- optInput    ->
+             case splitExtension inp of
+               (base, src) | Just tgt <- lookup src extensionMap
+                 -> Just $ addDir mout $ addExtension base tgt
+               _ -> Nothing
+         | otherwise -> Nothing
+      where
+      addDir (Just (Dir dir)) = (dir </>) . takeFileName
+      addDir _ = id
+
+data DirOrFile = Dir FilePath | File FilePath
+
+dirOrFile :: FilePath -> IO DirOrFile
+dirOrFile path = doesDirectoryExist path <&> \case
+  True  -> Dir path
+  False -> File path
 
 chat :: Options -> String -> IO ()
 chat o msg = when (optVerbose o) $ hPutStr stderr msg
