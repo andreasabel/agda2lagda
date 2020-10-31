@@ -2,19 +2,16 @@
 [![agda2lagda on Stackage Nightly](https://stackage.org/package/agda2lagda/badge/nightly)](https://stackage.org/nightly/package/agda2lagda)
 [![Stackage LTS version](https://www.stackage.org/package/agda2lagda/badge/lts?label=Stackage)](https://www.stackage.org/package/agda2lagda)
 [![Build Status](https://travis-ci.org/andreasabel/agda2lagda.svg?branch=master)](https://travis-ci.org/andreasabel/agda2lagda)
-<!--
-[![Documentation Status](https://readthedocs.org/projects/agda2lagda/badge/?version=latest)](http://agda2lagda.readthedocs.io/en/latest/?badge=latest)
--->
 
 # agda2lagda: Convert Agda/Haskell text to literate Agda/Haskell text
 
 Generate a LaTeX literate Agda/Haskell script from an Agda/Haskell script.
 
 - Single line comments are turned into ordinary LaTeX.
-  * Paragraphs followed by a line of dashes are turned into `heading`s.
+  * Paragraphs followed by a line of dashes are turned into `\heading`s.
   * At the end of the file, extra block comment terminators are removed.
 
-- Comment blocks, if started on the 0th column, count as commenting out.
+- Comment blocks, if started on the 0th column, count as _commenting out_.
   These will be turned into TeX comments.
   Nested comments are not recognized.
 
