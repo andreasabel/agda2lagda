@@ -1,4 +1,5 @@
--- Sample non-literate Agda program.
+-- Sample non-literate Agda program
+-- --------------------------------
 --
 -- This file serves as example for agda2lagda.
 -- The content may be non-sensical.
@@ -20,6 +21,9 @@ bar : D → Set
 bar x = D
 -- -}
 -- -}
+
+-- Another heading
+------------------
 
 module Submodule where
 

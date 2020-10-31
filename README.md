@@ -4,10 +4,12 @@
 Generate a LaTeX literate Agda/Haskell script from an Agda/Haskell script.
 
 - Single line comments are turned into ordinary LaTeX.
+  * Paragraphs followed by a line of dashes are turned into `heading`s.
+  * At the end of the file, extra block comment terminators are removed.
 
 - Comment blocks, if started on the 0th column, count as commenting out.
   These will be turned into TeX comments.
-  Nested comments are recognized.
+  Nested comments are not recognized.
 
 - The rest is interpreted as code and wrapped in a `code` environment.
 
@@ -15,6 +17,9 @@ Example: `agda2lagda Foo.agda`
 
 Input: `Foo.agda`
 ```agda
+-- Foo heading
+--------------
+--
 -- Sample non-literate Agda program.
 --
 -- This file serves as example for agda2lagda.
@@ -38,6 +43,9 @@ bar x = D
 -- -}
 -- -}
 
+-- Another heading
+------------------
+
 module Submodule where
 
   postulate
@@ -45,10 +53,13 @@ module Submodule where
 
 -- That's it.
 -- Bye.
+-- -} -} -} -}
 ```
 
 Output: `Foo.lagda.tex`
 ```latex
+\heading{Foo heading}
+
 Sample non-literate Agda program.
 
 This file serves as example for agda2lagda.
@@ -78,6 +89,8 @@ foo c = c   -- basically, the identity
 %% bar x = D
 %% -- -}
 %% --
+
+\heading{Another heading}
 
 \begin{code}
 module Submodule where
