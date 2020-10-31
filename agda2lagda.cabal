@@ -4,7 +4,7 @@ cabal-version:       >=1.10
 -- http://haskell.org/cabal/users-guide/
 
 name:                agda2lagda
-version:             0.2020.9.30
+version:             0.2020.11.1
 synopsis:            Translate .agda files into .lagda.tex files.
 
 description:         Simple command line tool to convert plain Agda
@@ -44,7 +44,7 @@ source-repository head
 source-repository this
   type:     git
   location: git://github.com/andreasabel/agda2lagda.git
-  tag:      v0.2020.9.30
+  tag:      v0.2020.11.1
 
 executable agda2lagda
   main-is:             Main.hs

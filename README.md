@@ -1,3 +1,10 @@
+[![Hackage version](https://img.shields.io/hackage/v/agda2lagda.svg?label=Hackage)](http://hackage.haskell.org/package/agda2lagda)
+[![agda2lagda on Stackage Nightly](https://stackage.org/package/agda2lagda/badge/nightly)](https://stackage.org/nightly/package/agda2lagda)
+[![Stackage LTS version](https://www.stackage.org/package/agda2lagda/badge/lts?label=Stackage)](https://www.stackage.org/package/agda2lagda)
+[![Build Status](https://travis-ci.org/andreasabel/agda2lagda.svg?branch=master)](https://travis-ci.org/andreasabel/agda2lagda)
+<!--
+[![Documentation Status](https://readthedocs.org/projects/agda2lagda/badge/?version=latest)](http://agda2lagda.readthedocs.io/en/latest/?badge=latest)
+-->
 
 # agda2lagda: Convert Agda/Haskell text to literate Agda/Haskell text
 
@@ -107,7 +114,15 @@ Bye.
 
 These are standard installation instructions.
 
-Last update of installation instructions: 2020-09-30.
+Last update of installation instructions: 2020-11-01.
+
+### From stackage.org
+
+Requires [stack](https://docs.haskellstack.org/en/stable/install_and_upgrade/).
+```
+stack update
+stack install agda2lagda
+```
 
 ### From hackage.haskell.org
 
