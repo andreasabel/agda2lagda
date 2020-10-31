@@ -1,4 +1,10 @@
+*.agdai
+*.aux
+*.log
+*.ptb
 /test/Foo.lagda.tex
+/test/Foo.pdf
+/test/Foo.tex
 /dist/
 /dist-*/
 /.stack-work
