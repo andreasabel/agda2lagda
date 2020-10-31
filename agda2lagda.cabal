@@ -20,7 +20,7 @@ license-file:        LICENSE
 author:              Andreas Abel
 maintainer:          Andreas Abel <andreas.abel@cse.gu.se>
 copyright:           Andreas Abel, 2020
-category:            Dependent types
+category:            Dependent types, Development
 
 build-type:          Simple
 
