@@ -17,8 +17,9 @@ import Data.Semigroup
 import Options.Applicative
 import Options.Applicative.Help.Pretty (vcat, text) -- , (<$$>))
 
-import System.Directory (doesFileExist, doesDirectoryExist)
-import System.FilePath  (splitExtension, addExtension, takeFileName, (</>))
+import System.Directory (doesFileExist, doesDirectoryExist, createDirectoryIfMissing)
+import System.FilePath
+  (splitExtension, addExtension, takeFileName, takeDirectory, hasTrailingPathSeparator, (</>))
 import System.IO        (hPutStr, stderr)
 import System.Exit      (exitFailure)
 
@@ -72,6 +73,7 @@ main = do
             ]
           exitFailure
 
+      createDirectoryIfMissing True $ takeDirectory outFile
       writeFile outFile result
 
   -- Done.
@@ -175,6 +177,10 @@ options =
       , unwords [ "Example:", self, "path/to/file.hs", "-o out/dir" ]
       , ""
       , "This places the output in file out/dir/file.lhs."
+      , ""
+      , unwords [ "Example:", self, "path/to/file.hs", "-o new/dir/" ]
+      , ""
+      , "This places the output in file new/dir/file.lhs, creating directories new/ and new/dir/ if necessary."
       ]
     ]
 
@@ -215,9 +221,11 @@ getTarget Options{..}
 data DirOrFile = Dir FilePath | File FilePath
 
 dirOrFile :: FilePath -> IO DirOrFile
-dirOrFile path = doesDirectoryExist path <&> \case
-  True  -> Dir path
-  False -> File path
+dirOrFile path
+  | hasTrailingPathSeparator path = return $ Dir path
+  | otherwise = doesDirectoryExist path <&> \case
+      True  -> Dir path
+      False -> File path
 
 chat :: Options -> String -> IO ()
 chat o msg = when (optVerbose o) $ hPutStr stderr msg

@@ -7,7 +7,7 @@ version :
 	cabal run agda2lagda -- --version
 
 test :
-	cabal run agda2lagda -- -v --force -o test/out test/Foo.agda
+	cabal run agda2lagda -- -v --force -o test/out/ test/Foo.agda
 	cabal run agda2lagda -- -v --force -o test/Foo-generated.lagda test/Foo.agda
 
 bug :
