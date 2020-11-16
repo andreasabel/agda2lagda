@@ -1,12 +1,20 @@
+# https://markkarpov.com/post/github-actions-for-haskell-ci.html
+
 name: Stack build
 
-on: [push]
+on: 
+  push:
+    branches: [master]
+  pull_request:
+    types: [opened, synchronize]
+
 
 jobs:
   build:
     name: GHC ${{ matrix.ghc }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         ghc: [8.10.2, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
         os: [ubuntu-latest]
@@ -28,8 +36,19 @@ jobs:
 
       - name: Setup Haskell
         uses: actions/setup-haskell@v1.1.3
+        id:   my-setup  # <-- self-chosen identifier
         with:
           ghc-version: ${{ matrix.ghc }}
+
+      - name: Pathes of the setup
+        run: |
+          echo "ghc-path    = ${{ steps.my-setup.outputs.ghc-path    }}"
+          echo "cabal-path  = ${{ steps.my-setup.outputs.cabal-path  }}"
+          echo "stack-path  = ${{ steps.my-setup.outputs.stack-path  }}"
+          echo "cabal-store = ${{ steps.my-setup.outputs.cabal-store }}"
+          echo "ghc-exe     = ${{ steps.my-setup.outputs.ghc-exe     }}"
+          echo "cabal-exe   = ${{ steps.my-setup.outputs.cabal-exe   }}"
+          echo "stack-exe   = ${{ steps.my-setup.outputs.stack-exe   }}"
 
       - name: Cache dependencies
         uses: actions/cache@v2.1.0
