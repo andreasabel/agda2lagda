@@ -19,8 +19,8 @@ jobs:
             ghc: 8.10.2
           - os: windows-latest
             ghc: 8.10.1
-    env:
-      STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc --fast"
+    # env:
+    #   STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc --fast"
 
     steps:
       - uses: actions/checkout@v2.3.2
@@ -40,12 +40,15 @@ jobs:
           # https://stackoverflow.com/questions/57946173/github-actions-run-step-on-specific-os
 
       - name: Install dependencies.
-        run: ${STACK_BUILD} --only-dependencies
+        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color auto --system-ghc --fast --only-dependencies
+        # Windows does not like this:
+        # run: ${STACK_BUILD} --only-dependencies
           # --test
 
       - name: Build agda2lagda.
-        run: ${STACK_BUILD}
+        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color auto --system-ghc --fast
+        # run: ${STACK_BUILD}
           # --test
 
       - name: Run agda2lagda
-        run: stack exec agda2lagda --help
+        run: stack exec -- agda2lagda --help
