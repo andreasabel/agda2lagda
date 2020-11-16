@@ -18,7 +18,8 @@ jobs:
           - os: macOS-latest
             ghc: 8.10.2
           - os: windows-latest
-            ghc: 8.10.1
+            ghc: 8.10.2
+            # TODO: stack-yaml file for ghc: 8.10.1
     # env:
     #   STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc --fast"
 
@@ -39,16 +40,17 @@ jobs:
           # runner.os is explained here:
           # https://stackoverflow.com/questions/57946173/github-actions-run-step-on-specific-os
 
-      - name: Install dependencies.
-        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color auto --system-ghc --fast --only-dependencies
+      - name: Build dependencies.
+        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --only-dependencies
         # Windows does not like this:
         # run: ${STACK_BUILD} --only-dependencies
           # --test
 
-      - name: Build agda2lagda.
-        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color auto --system-ghc --fast
+      - name: Build and install agda2lagda.
+        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast
+          # --copy-bins
         # run: ${STACK_BUILD}
           # --test
 
-      - name: Run agda2lagda
-        run: stack exec -- agda2lagda --help
+      - name: Run agda2lagda.
+        run: stack exec --system-ghc -- agda2lagda --help
