@@ -47,8 +47,7 @@ jobs:
           # --test
 
       - name: Build and install agda2lagda.
-        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast
-          # --copy-bins
+        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --copy-bins
         # run: ${STACK_BUILD}
           # --test
 
