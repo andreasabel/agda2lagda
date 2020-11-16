@@ -2,12 +2,9 @@
 
 name: Stack build
 
-on: 
-  push:
-    branches: [master]
-  pull_request:
-    types: [opened, synchronize]
-
+on:
+  push:         { branches: [master] }
+  pull_request: { types: [opened, synchronize] }
 
 jobs:
   build:
@@ -18,16 +15,13 @@ jobs:
       matrix:
         ghc: [8.10.2, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
         os: [ubuntu-latest]
-        # os: [ubuntu-latest, macOS-latest, windows-latest]
-        # exclude:
-        #   - os: macOS-latest
-        #   - os: windows-latest
         include:
           - os: macOS-latest
             ghc: 8.10.2
           - os: windows-latest
             ghc: 8.10.2
             # TODO: stack-yaml file for ghc: 8.10.1
+
     # env:
     #   STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc --fast"
 
@@ -40,8 +34,9 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
 
-      - name: Pathes of the setup
+      - name: Info about the setup
         run: |
+          echo "runner.os   = ${{ runner.os }}"
           echo "ghc-path    = ${{ steps.my-setup.outputs.ghc-path    }}"
           echo "cabal-path  = ${{ steps.my-setup.outputs.cabal-path  }}"
           echo "stack-path  = ${{ steps.my-setup.outputs.stack-path  }}"
@@ -51,6 +46,7 @@ jobs:
           echo "stack-exe   = ${{ steps.my-setup.outputs.stack-exe   }}"
 
       - name: Cache dependencies
+        if:   runner.os == 'Linux'
         uses: actions/cache@v2.1.0
         with:
           path: "~/.stack"
@@ -71,4 +67,4 @@ jobs:
           # --test
 
       - name: Run agda2lagda.
-        run: stack exec --system-ghc -- agda2lagda --help
+        run: ~/.local/bin/agda2lagda --help
