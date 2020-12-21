@@ -1,7 +1,7 @@
 [![Hackage version](https://img.shields.io/hackage/v/agda2lagda.svg?label=Hackage)](http://hackage.haskell.org/package/agda2lagda)
 [![agda2lagda on Stackage Nightly](https://stackage.org/package/agda2lagda/badge/nightly)](https://stackage.org/nightly/package/agda2lagda)
 [![Stackage LTS version](https://www.stackage.org/package/agda2lagda/badge/lts?label=Stackage)](https://www.stackage.org/package/agda2lagda)
-[![Build Status](https://travis-ci.org/andreasabel/agda2lagda.svg?branch=master)](https://travis-ci.org/andreasabel/agda2lagda)
+[![Build Status](https://travis-ci.com/andreasabel/agda2lagda.svg?branch=master)](https://travis-ci.com/andreasabel/agda2lagda)
 [![Stack build](https://github.com/andreasabel/agda2lagda/workflows/Stack%20build/badge.svg)](https://github.com/andreasabel/agda2lagda/actions)
 
 
