@@ -143,6 +143,7 @@ options =
       $  long "output"
       <> short 'o'
       <> metavar "OUT"
+      <> action "directory"
       <> help "Name of output file or directory."
 
   oStdin =
@@ -154,6 +155,7 @@ options =
   oInput = dashToStdin <$> do
     strArgument
       $  metavar "INFILE"
+      <> action "file"
       <> help "The input file containing the Agda/Haskell text."
     where
     -- dash is interpreted as stdin

@@ -19,4 +19,11 @@ install :
 haddock :
 	cabal v1-haddock --executables
 
+# To install bash completion,
+# agda2lagda needs to be installed on the PATH.
+# (Only needs to be installed once, even if options of agda2lagda change.)
+
+install-bash-completion :
+	install-bash-completion.sh agda2lagda
+
 # EOF
