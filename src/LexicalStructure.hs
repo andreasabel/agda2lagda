@@ -30,9 +30,7 @@ module LexicalStructure
   , pattern TextItem
   ) where
 
-import Data.Bifunctor
-import Data.Char (isSpace)
-import Data.Maybe
+import Util
 
 -- * Item parser
 
@@ -63,7 +61,7 @@ pattern CommItem a = Item Comment a
 parseItems
   :: RevList Item  -- ^ Accumulator, reversed list.
   -> String        -- ^ Input.
-  -> [Item]        -- ^ Parse result.
+  -> [Item]        -- ^ Parse result.  Consecutive items are of different type.
 parseItems acc = \case
   [] -> reverse acc
   s  ->
@@ -96,6 +94,9 @@ parseItem n it s =
       -- Start parsing an item.  We discard initial blank lines.
       (Nothing, _)   -> parseItem 0 (lineToState line) s'
 
+      -- If the next line has different type, we are done with the item.
+      -- Otherwise, we continue.
+      -- Thus, two consecutive items are never of the same type.
       (Just (Item t ls), Just (Item t' (k, l)))
         | t /= t'   -> done
         | otherwise -> parseItem 0 (Just $ Item t ls') s'
@@ -145,6 +146,8 @@ type RespectBlockComment = Bool
 type NestingLevel = Int
 
 -- | Parse next line (including block comment if it starts on that line).
+--
+--   Deletes trailing whitespace.
 
 parseLine :: Indentation -> String -> (Line, String)
 parseLine ind = \case
@@ -235,9 +238,3 @@ parseBlockComment b n acc = \case
 
   []  -> (acc,[])
   c:s -> parseBlockComment b n (c:acc) s
-
-
--- * Auxiliary functions.
-
-trimLeft :: String -> String
-trimLeft = dropWhile isSpace

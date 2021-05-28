@@ -51,6 +51,7 @@ executable agda2lagda
   main-is:             Main.hs
 
   other-modules:       LexicalStructure
+                       Markup
                        Render
                        Util
                        Version

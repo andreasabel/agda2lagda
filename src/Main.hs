@@ -53,7 +53,7 @@ main = do
 
   -- Generate output.
 
-  let result = lagdaTex $ gobbleTrailingBlockCommentClosers items
+  let result = lagdaTex items
 
   -- Save to file or print to stdout.
 
