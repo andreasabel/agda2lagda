@@ -1,8 +1,13 @@
 -- Sample non-literate Agda program
 -- ================================
 --
--- This file serves as example for agda2lagda.
--- The content may be non-sensical.
+-- A remark to test bulleted lists:
+--
+-- * This file serves as example for agda2lagda.
+--
+-- * The content may be non-sensical.
+--
+-- Indeed!
 
 module Foo where
 

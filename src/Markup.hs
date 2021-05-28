@@ -18,8 +18,9 @@ data Item
   | TextItem TextItem
 
 data TextItem
-  = Paragraph String      -- ^ A paragraph without empty lines in between.
+  = Paragraph Paragraph   -- ^ A non-empty list of non-whitespace lines.
   | Heading Level String  -- ^ A heading at the given level (1,2).
+  | Itemize [Paragraph]   -- ^ A bulleted list (non-nested).
 
 type Level = Int
 
@@ -29,23 +30,51 @@ markup :: [L.Item] -> [Item]
 markup = concatMap processText . gobbleTrailingBlockCommentClosers
   where
   processText = \case
-    L.TextItem s -> map (TextItem . detectHeading) $ paragraphs s
     L.CommItem s -> [CommItem s]
     L.CodeItem s -> [CodeItem s]
+    L.TextItem s ->
+      map TextItem
+      . groupBullets
+      . map detectMarkup
+      $ paragraphs s
 
 -- | A paragraph is a non-empty list of non-empty lines.
 type Paragraph = [String]
 
+groupBullets :: [TextItem] -> [TextItem]
+groupBullets = map joinItems . groupBy (\ a b -> all (isJust . isItemize) [a,b])
+  where
+  isItemize = \case
+    Itemize ps -> Just ps
+    _ -> Nothing
+  joinItems :: [TextItem] -> TextItem
+  joinItems is =
+    -- In each group...
+    case mapMaybe isItemize is of
+      -- ...either it is not Itemize
+      []  -> head is
+      -- or all are Itemize.
+      pps -> Itemize $ concat pps
+
 -- | If the last line of a paragraph is just dashes or equal signs, we are a heading.
 
-detectHeading :: Paragraph -> TextItem
-detectHeading ls
+detectMarkup :: Paragraph -> TextItem
+detectMarkup ls@(l1:ls1)
+  | Just s <- bulleted l1 = Itemize [s:ls1]
   | all (== '=') l0 = Heading 1 $ unwords $ map trimLeft ls0
   | all (== '-') l0 = Heading 2 $ unwords $ map trimLeft ls0
-  | otherwise       = Paragraph $ unlines ls
+  | otherwise       = Paragraph ls
   where
   (ls0, l) = initLast ls  -- safe!
   l0 = trimLeft l
+
+-- | If the line starts with @*@, return the rest.
+
+bulleted :: String -> Maybe String
+bulleted l =
+  case trimLeft l of
+    '*':' ':s -> Just s
+    _ -> Nothing
 
 -- | Split a text into paragraphs, dropping extra empty lines in between.
 --   Preserves indentation.

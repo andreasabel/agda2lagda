@@ -34,6 +34,11 @@ lagdaTex its = unlines $ concat
 
 renderTex :: TextItem -> String
 renderTex = \case
-  Paragraph s -> s
+  Paragraph p -> unlines p
   Heading 1 s -> "\\heading{" ++ s ++ "}\n"
   Heading 2 s -> "\\subheading{" ++ s ++ "}\n"
+  Itemize ps  -> unlines $ concat $
+    [ [ "\\begin{itemize}\n" ]
+    , map (unlines . ("\\item" :)) ps
+    , [ "\\end{itemize}" ]
+    ]
