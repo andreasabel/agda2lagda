@@ -4,7 +4,7 @@ cabal-version:       >=1.10
 -- http://haskell.org/cabal/users-guide/
 
 name:                agda2lagda
-version:             0.2020.11.1
+version:             0.2021.6.1
 synopsis:            Translate .agda files into .lagda.tex files.
 
 description:         Simple command line tool to convert plain Agda
@@ -19,7 +19,7 @@ license-file:        LICENSE
 
 author:              Andreas Abel
 maintainer:          Andreas Abel <andreas.abel@cse.gu.se>
-copyright:           Andreas Abel, 2020
+copyright:           Andreas Abel, 2020, 2021
 category:            Dependent types, Development
 
 build-type:          Simple
@@ -45,7 +45,7 @@ source-repository head
 source-repository this
   type:     git
   location: git://github.com/andreasabel/agda2lagda.git
-  tag:      v0.2020.11.1
+  tag:      v0.2021.6.1
 
 executable agda2lagda
   main-is:             Main.hs
