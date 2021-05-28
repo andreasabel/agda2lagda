@@ -1,4 +1,7 @@
 -- | Render the parsed items.
+--
+-- A line of text consisting only of "=" (and at least 2) is a heading.
+-- A line of text consisting only of "-" (and at least 2) is a subheading.
 
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE PatternSynonyms #-}
@@ -14,7 +17,7 @@ import Data.Char
 import LexicalStructure
   (Item, pattern TextItem, pattern CommItem, pattern CodeItem)
 import Util
-  (updateLast)
+  (trim, updateLast)
 
 -- | Render into plain literate LaTeX Agda.
 
@@ -36,22 +39,25 @@ lagdaTex its = unlines $ concat
       ]
 
 -- | Paragraphs followed by a line of dashes are turned into @\heading{}@s.
+--   Also trims whitespace.
 
 renderHeadingsTex :: String -> String
-renderHeadingsTex = unlines . loop [] . lines
+renderHeadingsTex = unlines . loop [] . map trim . lines
   where
   -- acc holds the current paragraph in reverse line order
   loop acc = \case
     [] -> reverse acc
     l : ls
       -- If we encounter a blank line, the paragraph ends: reset search for heading.
-      | all isSpace l -> reverse ("":acc) ++ loop [] ls
+      | null l -> reverse ("":acc) ++ loop [] ls
       -- If we find a line of dashes, the current paragraph is a heading (unless it is empty).
-      | all (=='-') l ->
-          if null acc then loop [] ls
-          else [ "\\heading{" ++ unwords (reverse acc) ++ "}" ] ++ loop [] ls
+      | all (== '-') l -> makeHeading "subheading"
+      | all (== '=') l -> makeHeading "heading"
       -- Otherwise continue the current paragraph.
       | otherwise     -> loop (l:acc) ls
+      where
+      makeHeading cmd =
+        [ "\\" ++ cmd ++ "{" ++ unwords (reverse acc) ++ "}" | not (null acc) ] ++ loop [] ls
 
 -- | Text lines at the end of file consisting solely of words "-}" are
 -- discarded, to accommodate for a hack that makes it easy to comment
