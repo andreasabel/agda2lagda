@@ -3,7 +3,7 @@
 name: Stack build
 
 on:
-  push:         { branches: [master] }
+  push:         { branches: [master, ci-*] }
   pull_request: { types: [opened, synchronize] }
 
 jobs:
@@ -67,4 +67,4 @@ jobs:
           # --test
 
       - name: Run agda2lagda.
-        run: ~/.local/bin/agda2lagda --help
+        run: stack exec --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc agda2lagda -- --help
