@@ -1,4 +1,17 @@
-.PHONY : bug haddock install test test-help version
+.PHONY : bug haddock install quick-test test test-help version
+
+expand-includes=data/expand-includes.awk
+
+all : test README.md
+
+README.md : data/cpp.README.md $(expand-includes)
+	@echo "Regenerating $@."
+	@echo "<!-- DO NOT EDIT me directly, as I am generated from $< ! -->" > $@
+	@echo "" >> $@
+	@$(expand-includes) $< >> $@
+
+test :
+	cabal test
 
 test-help:
 	cabal run agda2lagda -- --help
@@ -6,7 +19,7 @@ test-help:
 version :
 	cabal run agda2lagda -- --version
 
-test :
+quick-test :
 	cabal run agda2lagda -- -v --force -o test/out/ test/Foo.agda
 	cabal run agda2lagda -- -v --force -o test/Foo-generated.lagda test/Foo.agda
 
