@@ -1,0 +1,9 @@
+{
+  "command": "agda2lagda",
+  "input_files": "*.agda",
+  "arguments": ["--dry-run", "${GOLDPLATE_INPUT_FILE}"],
+  "asserts": [
+    {"exit_code": 0},
+    {"stdout": "golden/${GOLDPLATE_INPUT_NAME}.out"}
+  ]
+}
