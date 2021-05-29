@@ -102,5 +102,7 @@ test-suite test
   main-is:            Tests.hs
   default-language:   Haskell2010
   ghc-options:        -threaded
-  build-depends:      base, process
+  build-depends:      base >= 4.11
+                        -- goldplate requires ghc >= 8.4
+                      , process
   build-tool-depends: goldplate:goldplate
