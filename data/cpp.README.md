@@ -23,6 +23,11 @@ Generate a LaTeX literate Agda/Haskell script from an Agda/Haskell script.
 
 - The rest is interpreted as code and wrapped in a `code` environment.
 
+Examples (rendered):
+- http://www.cse.chalmers.se/~abela/#MultiSortedAlgebra
+- http://www.cse.chalmers.se/~abela/#cr-sk
+
+
 Example: `agda2lagda Foo.agda`
 
 Input: `Foo.agda`

@@ -1,8 +1,8 @@
 # Revision history for agda2lagda
 
-## (unreleased)
+## 0.2021.6.1
 
-* Paragraphs starting with `* ` are recognizes as `\item` and
+* Paragraphs starting with `* ` are recognized as `\item` and
   organized in an `itemize` environment.  Cannot be nested.
 * Render doubly-underlined (`===`) paragraphs as `\heading`,
   dash-underlined (`---`) paragraphs as `\subheading`.
