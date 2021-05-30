@@ -1,4 +1,4 @@
-resolver: lts-16.12
+resolver: lts-16.31
 compiler: ghc-8.8.4
 compiler-check: match-exact
 
@@ -6,3 +6,6 @@ compiler-check: match-exact
 packages:
   - '.'
 
+# for --test
+extra-deps:
+- goldplate-0.2.0
