@@ -4,11 +4,14 @@ expand-includes=data/expand-includes.awk
 
 all : test README.md
 
-README.md : data/cpp.README.md $(expand-includes)
+# Atm, hackage renders comments verbatim, so we need to delete them.
+# https://github.com/haskell/hackage-server/issues/937
+README.md : data/cpp.README.md $(expand-includes) Makefile
 	@echo "Regenerating $@."
-	@echo "<!-- DO NOT EDIT me directly, as I am generated from $< ! -->" > $@
-	@echo "" >> $@
-	@$(expand-includes) $< >> $@
+	@rm $@
+#	@echo "<!-- DO NOT EDIT me directly, as I am generated from $< ! -->" > $@
+#	@echo "" >> $@
+	@$(expand-includes) $< | strip-html-comments.sed >> $@
 
 test :
 	cabal test
