@@ -7,8 +7,6 @@ module Render
   ( lagdaTex
   ) where
 
-import Util
-
 import qualified LexicalStructure as L
 import Markup
 import Version
