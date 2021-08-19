@@ -29,7 +29,9 @@ jobs:
       - uses: actions/checkout@v2                   # latest (2020-12-21): v2.3.4
 
       - name: Setup Haskell
-        uses: haskell/actions/setup@v1.1            # latest (2020-12-21): v1.1.5
+        uses: haskell/actions/setup@v1
+                                                    # latest (2020-12-21): v1.1.5
+                                                    # latest (2021-08-19): v1.2.3
         id:   my-setup  # <-- self-chosen identifier
         with:
           ghc-version: ${{ matrix.ghc }}
