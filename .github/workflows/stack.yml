@@ -13,14 +13,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ghc: [8.10.5, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
+        ghc: [9.0.1, 8.10.5, 8.8.4, 8.6.5, 8.4.4]
         os: [ubuntu-latest]
         include:
           - os: macOS-latest
             ghc: 8.10.5
           - os: windows-latest
             ghc: 8.10.5
-            # TODO: stack-yaml file for ghc: 8.10.1
 
     # env:
     #   STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc --fast"
@@ -63,10 +62,9 @@ jobs:
         # run: ${STACK_BUILD} --only-dependencies
           # --test
 
-      - name: Build and install agda2lagda.
-        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --copy-bins
-        # run: ${STACK_BUILD}
-          # --test
+      - name: Build and test agda2lagda.
+        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --test
+          #  --copy-bins
 
       - name: Run agda2lagda.
         run: stack exec --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc agda2lagda -- --help
