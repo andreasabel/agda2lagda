@@ -5,3 +5,12 @@ compiler-check: match-exact
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
+
+# Couldn't get --test to work because of dependency cycle involving aeson.
+# # For --test
+# extra-deps:
+# - goldplate-0.2.0
+# - Glob-0.10.1
+# - aeson-1.5.6.0
+# - regex-pcre-builtin-0.95.2.3.8.43
+# - regex-base-0.94.0.1

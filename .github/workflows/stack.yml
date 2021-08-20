@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ghc: [9.0.1, 8.10.5, 8.8.4, 8.6.5, 8.4.4]
+        ghc: [9.0.1, 8.10.5, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
         os: [ubuntu-latest]
         include:
           - os: macOS-latest
@@ -62,9 +62,14 @@ jobs:
         # run: ${STACK_BUILD} --only-dependencies
           # --test
 
-      - name: Build and test agda2lagda.
-        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --test
+      - name: Build agda2lagda.
+        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast
           #  --copy-bins
+
+      - name: Test agda2lagda.
+        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --test
+        if: matrix.ghc >= 8.6
+          # goldplate is only reasonably supported from stack-8.6.5.yaml
 
       - name: Run agda2lagda.
         run: stack exec --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc agda2lagda -- --help
