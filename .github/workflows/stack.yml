@@ -62,13 +62,16 @@ jobs:
         # run: ${STACK_BUILD} --only-dependencies
           # --test
 
-      - name: Build agda2lagda.
+      - name: Build agda2lagda w/o tests.
         run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast
           #  --copy-bins
 
-      - name: Test agda2lagda.
+      - name: Build agda2lagda and run tests.
         run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --test
-        if: matrix.ghc >= 8.6
+        if: matrix.ghc != '8.4.4' && matrix.ghc != '8.2.2' && matrix.ghc != '8.0.2'
+        # Fall back to string comparison as version-comparison does not seem to work.
+        # Simply exclude the versions that do not support
+        # if: matrix.ghc >= 8.6  ## >= does not seem to work out-of-the-box for version
           # goldplate is only reasonably supported from stack-8.6.5.yaml
 
       - name: Run agda2lagda.
