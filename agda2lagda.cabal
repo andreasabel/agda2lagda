@@ -24,8 +24,11 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md
                      README.md
                      Makefile
+                     test/tests.goldplate
                      test/Foo.agda
+                     test/golden/Foo.lagda.tex
                      test/ClosingCommentInString.agda
+                     test/golden/ClosingCommentInString.lagda.tex
 
 tested-with:         GHC == 8.0.2
                      GHC == 8.2.2
@@ -107,3 +110,5 @@ test-suite test
                         -- goldplate requires ghc >= 8.4
                       , process
   build-tool-depends: goldplate:goldplate
+                      -- We also need to depend on ourselves since goldplate calls us.
+                      , agda2lagda:agda2lagda
