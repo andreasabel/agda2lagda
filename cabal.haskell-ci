@@ -5,5 +5,5 @@ macos-jobs: == 8.10.*
 -- hvr-ppa latest are 9.0.1 and 8.10.4
 ghcup-jobs: >= 9.2 || > 8.10.4 && < 9.0
 
--- no-effect, use --tests-jobs '< 9.1 && >= 8.4'
+-- Same as --tests-jobs '< 9.1 && >= 8.4'
 tests: < 9.1 && >= 8.4
