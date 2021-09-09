@@ -13,13 +13,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ghc: [9.0.1, 8.10.6, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
+        ghc: [9.0.1, 8.10.7, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
         os: [ubuntu-latest]
         include:
           - os: macOS-latest
-            ghc: 8.10.6
+            ghc: 8.10.7
           - os: windows-latest
-            ghc: 8.10.6
+            ghc: 8.10.7
 
     # env:
     #   STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc --fast"
