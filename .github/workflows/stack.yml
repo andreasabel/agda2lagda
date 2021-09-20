@@ -13,6 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Note: check release logic below when changing the matrix!
         ghc: [9.0.1, 8.10.7, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
         os: [ubuntu-latest]
         include:
@@ -98,7 +99,47 @@ jobs:
       - name: Run agda2lagda.
         run: stack exec ${{ env.STACK_FLAGS }} agda2lagda -- --help
 
-      - name: Mac package.
+      ## Release
+      ########################################################################
+
+      - name: Source tarball creation.
+        # Conditional to ensure this deployment is only run once per action.
+        if: matrix.ghc == '9.0.1'
+        run: |
+          export DIST_TGZ=$(cabal sdist | tail -1)
+          echo "DIST_TGZ=${DIST_TGZ}" >> ${GITHUB_ENV}
+
+      - name: Source tarball release.
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Test release
+          tag_name: v0.0.0
+          draft: true
+          prerelease: true
+          files: |
+            ${{ env.DIST_TGZ }}
+
+      - name: Linux release preparation.
+        if: runner.os == 'Linux'
+        run: |
+          export AGDA2LAGDA_EXE=$(stack path --local-install-root ${{ env.STACK_FLAGS }})/bin/agda2lagda
+          export AGDA2LAGDA_VERSION=$(${AGDA2LAGDA_EXE} --numeric-version)
+          export AGDA2LAGDA_BIN=agda2lagda-${AGDA2LAGDA_VERSION}-linux.binary
+          cp -p ${AGDA2LAGDA_EXE} ${AGDA2LAGDA_BIN}
+          # Save env variables for the next step
+          echo "AGDA2LAGDA_BIN=${AGDA2LAGDA_BIN}" >> ${GITHUB_ENV}
+
+      - name: Linux release.
+        if: runner.os == 'Linux'
+        # && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Test release
+          tag_name: v0.0.0
+          files: |
+            ${{ env.AGDA2LAGDA_BIN }}
+
+      - name: Mac release preparation.
         if: runner.os == 'macOS'
         run: |
           export AGDA2LAGDA_EXE=$(stack path --local-install-root ${{ env.STACK_FLAGS }})/bin/agda2lagda
@@ -131,3 +172,25 @@ jobs:
           files: |
             ${{ env.AGDA2LAGDA_BIN }}
             ${{ env.AGDA2LAGDA_PKG }}
+
+
+      - name: Windows release preparation.
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          export AGDA2LAGDA_EXE=$(stack path --local-install-root ${{ env.STACK_FLAGS }})/bin/agda2lagda
+          export AGDA2LAGDA_VERSION=$(${AGDA2LAGDA_EXE} --numeric-version)
+          export AGDA2LAGDA_VER_EXE=agda2lagda-${AGDA2LAGDA_VERSION}.exe
+          cp -p ${AGDA2LAGDA_EXE}.exe ${AGDA2LAGDA_VER_EXE}
+          # Save env variables for the next step
+          echo "AGDA2LAGDA_VER_EXE=${AGDA2LAGDA_VER_EXE}" >> ${GITHUB_ENV}
+
+      - name: Windows release.
+        if: runner.os == 'Windows'
+        # && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Test release
+          tag_name: v0.0.0
+          files: |
+            ${{ env.AGDA2LAGDA_VER_EXE }}
