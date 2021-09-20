@@ -3,8 +3,11 @@
 name: Stack build
 
 on:
-  push:         { branches: [master, ci-*] }
-  pull_request: { types: [opened, synchronize] }
+  push:
+    branches: [ master, ci-* ]
+    tags:     [ v* ]
+  pull_request:
+    types: [ opened, synchronize]
 
 jobs:
   build:
@@ -104,12 +107,17 @@ jobs:
 
       - name: Source tarball creation.
         # Conditional to ensure this deployment is only run once per action.
-        if: matrix.ghc == '9.0.1'
+        if: >-
+          startsWith(github.ref, 'refs/tags/v')
+          && matrix.ghc == '9.0.1'
         run: |
           export DIST_TGZ=$(cabal sdist | tail -1)
           echo "DIST_TGZ=${DIST_TGZ}" >> ${GITHUB_ENV}
 
       - name: Source tarball release.
+        if: >-
+          startsWith(github.ref, 'refs/tags/v')
+          && matrix.ghc == '9.0.1'
         uses: softprops/action-gh-release@v1
         with:
           name: Test release
@@ -120,7 +128,9 @@ jobs:
             ${{ env.DIST_TGZ }}
 
       - name: Linux release preparation.
-        if: runner.os == 'Linux'
+        if: >-
+          startsWith(github.ref, 'refs/tags/v')
+          && runner.os == 'Linux'
         run: |
           export AGDA2LAGDA_EXE=$(stack path --local-install-root ${{ env.STACK_FLAGS }})/bin/agda2lagda
           export AGDA2LAGDA_VERSION=$(${AGDA2LAGDA_EXE} --numeric-version)
@@ -130,8 +140,9 @@ jobs:
           echo "AGDA2LAGDA_BIN=${AGDA2LAGDA_BIN}" >> ${GITHUB_ENV}
 
       - name: Linux release.
-        if: runner.os == 'Linux'
-        # && startsWith(github.ref, 'refs/tags/v')
+        if: >-
+          startsWith(github.ref, 'refs/tags/v')
+          && runner.os == 'Linux'
         uses: softprops/action-gh-release@v1
         with:
           name: Test release
@@ -140,7 +151,9 @@ jobs:
             ${{ env.AGDA2LAGDA_BIN }}
 
       - name: Mac release preparation.
-        if: runner.os == 'macOS'
+        if: >-
+          startsWith(github.ref, 'refs/tags/v')
+          && runner.os == 'macOS'
         run: |
           export AGDA2LAGDA_EXE=$(stack path --local-install-root ${{ env.STACK_FLAGS }})/bin/agda2lagda
           export AGDA2LAGDA_VERSION=$(${AGDA2LAGDA_EXE} --numeric-version)
@@ -163,8 +176,9 @@ jobs:
           echo "AGDA2LAGDA_PKG=${AGDA2LAGDA_PKG}" >> ${GITHUB_ENV}
 
       - name: Mac release.
-        if: runner.os == 'macOS'
-        # && startsWith(github.ref, 'refs/tags/v')
+        if: >-
+          startsWith(github.ref, 'refs/tags/v')
+          && runner.os == 'macOS'
         uses: softprops/action-gh-release@v1
         with:
           name: Test release
@@ -175,7 +189,9 @@ jobs:
 
 
       - name: Windows release preparation.
-        if: runner.os == 'Windows'
+        if: >-
+          startsWith(github.ref, 'refs/tags/v')
+          && runner.os == 'Windows'
         shell: bash
         run: |
           export AGDA2LAGDA_EXE=$(stack path --local-install-root ${{ env.STACK_FLAGS }})/bin/agda2lagda
@@ -186,8 +202,9 @@ jobs:
           echo "AGDA2LAGDA_VER_EXE=${AGDA2LAGDA_VER_EXE}" >> ${GITHUB_ENV}
 
       - name: Windows release.
-        if: runner.os == 'Windows'
-        # && startsWith(github.ref, 'refs/tags/v')
+        if: >-
+          startsWith(github.ref, 'refs/tags/v')
+          && runner.os == 'Windows'
         uses: softprops/action-gh-release@v1
         with:
           name: Test release
