@@ -21,6 +21,12 @@ jobs:
           - os: windows-latest
             ghc: 8.10.7
 
+    env:
+      STACK_FLAGS: --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
+      # STACK_BUILD: stack build ${{ STACK_FLAGS }}  ## invalid
+      # STACK_BUILD: stack build ${{ env.STACK_FLAGS }}  ## also invalid
+      STACK_BUILD: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast
+
     # env:
     #   STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc --fast"
 
@@ -31,43 +37,59 @@ jobs:
         uses: haskell/actions/setup@v1
                                                     # latest (2020-12-21): v1.1.5
                                                     # latest (2021-08-19): v1.2.3
-        id:   my-setup  # <-- self-chosen identifier
+        id:   haskell-setup  # <-- self-chosen identifier
         with:
           ghc-version: ${{ matrix.ghc }}
+          enable-stack: true
+          # stack-version: latest
 
       - name: Info about the setup
         run: |
           echo "runner.os   = ${{ runner.os }}"
-          echo "ghc-path    = ${{ steps.my-setup.outputs.ghc-path    }}"
-          echo "cabal-path  = ${{ steps.my-setup.outputs.cabal-path  }}"
-          echo "stack-path  = ${{ steps.my-setup.outputs.stack-path  }}"
-          echo "cabal-store = ${{ steps.my-setup.outputs.cabal-store }}"
-          echo "ghc-exe     = ${{ steps.my-setup.outputs.ghc-exe     }}"
-          echo "cabal-exe   = ${{ steps.my-setup.outputs.cabal-exe   }}"
-          echo "stack-exe   = ${{ steps.my-setup.outputs.stack-exe   }}"
+          echo "ghc-path    = ${{ steps.haskell-setup.outputs.ghc-path    }}"
+          echo "cabal-path  = ${{ steps.haskell-setup.outputs.cabal-path  }}"
+          echo "stack-path  = ${{ steps.haskell-setup.outputs.stack-path  }}"
+          echo "cabal-store = ${{ steps.haskell-setup.outputs.cabal-store }}"
+          echo "ghc-exe     = ${{ steps.haskell-setup.outputs.ghc-exe     }}"
+          echo "cabal-exe   = ${{ steps.haskell-setup.outputs.cabal-exe   }}"
+          echo "stack-exe   = ${{ steps.haskell-setup.outputs.stack-exe   }}"
+          echo "stack-root  = ${{ steps.haskell-setup.outputs.stack-root  }}"
+          echo "STACK_FLAGS = ${{ env.STACK_FLAGS }}"
+          echo "STACK_BUILD = ${{ env.STACK_BUILD }}"
+          # echo "STACK_BUILD_ENV = ${{ env.STACK_BUILD_ENV }}"
 
       - name: Cache dependencies
-        if:   runner.os == 'Linux'
+        # if:   runner.os == 'Linux'
         uses: actions/cache@v2                      # latest (2020-12-21): v2.1.3
         with:
-          path: "~/.stack"
+          path: ${{ steps.haskell-setup.outputs.stack-root }}
           # A unique cache is used for each stack.yaml.
-          key: ${{ runner.os }}-new-${{ hashFiles(format('stack-{0}.yaml', matrix.ghc)) }}
+          key: ${{ runner.os }}-${{ steps.haskell-setup.outputs.stack-root }}-${{ hashFiles(format('stack-{0}.yaml', matrix.ghc)) }}
+        ## DOESN'T WORK:
+        # # For brevity of notation (rather than for using the environment variable), let
+        # #   env.stack-root = steps.haskell-setup.outputs.stack-root
+        # env:
+        #   stack-root: ${{ steps.haskell-setup.outputs.stack-root }}
+        # with:
+        #   path: ${{ env.stack-root }}
+        #   # A unique cache is used for each stack.yaml.
+        #   key: ${{ runner.os }}-${{ env.stack-root }}-${{ hashFiles(format('stack-{0}.yaml', matrix.ghc)) }}
           # runner.os is explained here:
           # https://stackoverflow.com/questions/57946173/github-actions-run-step-on-specific-os
 
       - name: Build dependencies.
-        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --only-dependencies
+        # run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --only-dependencies
+        run: ${{ env.STACK_BUILD }} --only-dependencies
         # Windows does not like this:
         # run: ${STACK_BUILD} --only-dependencies
           # --test
 
       - name: Build agda2lagda w/o tests.
-        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast
+        run: ${{ env.STACK_BUILD }}
           #  --copy-bins
 
       - name: Build agda2lagda and run tests.
-        run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --test
+        run: ${{ env.STACK_BUILD }} --test
         if: matrix.ghc != '8.4.4' && matrix.ghc != '8.2.2' && matrix.ghc != '8.0.2'
         # Fall back to string comparison as version-comparison does not seem to work.
         # Simply exclude the versions that do not support
@@ -75,4 +97,20 @@ jobs:
           # goldplate is only reasonably supported from stack-8.6.5.yaml
 
       - name: Run agda2lagda.
-        run: stack exec --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc agda2lagda -- --help
+        run: stack exec ${{ env.STACK_FLAGS }} agda2lagda -- --help
+
+      - name: Mac package.
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p tmp/usr/local/bin
+          export AGDA2LAGDA_EXE=$(stack path --local-install-root ${{ env.STACK_FLAGS }})/bin/agda2lagda
+          export AGDA2LAGDA_VERSION=$(${AGDA2LAGDA_EXE} --numeric-version)
+          export AGDA2LAGDA_PKG=AGDA2LAGDA-${AGDA2LAGDA_VERSION}-mac.pkg
+          cp -p ${AGDA2LAGDA_EXE} tmp/usr/local/bin/agda2lagda
+          pkgbuild \
+            --root tmp \
+            --identifier abel.andreas.agda2lagda.pkg \
+            --version ${AGDA2LAGDA_VERSION} \
+            --install-location / \
+            --ownership recommended \
+            ${AGDA2LAGDA_PKG}
