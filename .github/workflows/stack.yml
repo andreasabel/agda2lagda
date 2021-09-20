@@ -25,10 +25,10 @@ jobs:
       STACK_FLAGS: --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
       # STACK_BUILD: stack build ${{ STACK_FLAGS }}  ## invalid
       # STACK_BUILD: stack build ${{ env.STACK_FLAGS }}  ## also invalid
-      STACK_BUILD: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast
+      STACK_BUILD: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
 
     # env:
-    #   STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc --fast"
+    #   STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc"
 
     steps:
       - uses: actions/checkout@v2                   # latest (2020-12-21): v2.3.4
@@ -56,7 +56,6 @@ jobs:
           echo "stack-root  = ${{ steps.haskell-setup.outputs.stack-root  }}"
           echo "STACK_FLAGS = ${{ env.STACK_FLAGS }}"
           echo "STACK_BUILD = ${{ env.STACK_BUILD }}"
-          # echo "STACK_BUILD_ENV = ${{ env.STACK_BUILD_ENV }}"
 
       - name: Cache dependencies
         # if:   runner.os == 'Linux'
@@ -78,7 +77,7 @@ jobs:
           # https://stackoverflow.com/questions/57946173/github-actions-run-step-on-specific-os
 
       - name: Build dependencies.
-        # run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --fast --only-dependencies
+        # run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --only-dependencies
         run: ${{ env.STACK_BUILD }} --only-dependencies
         # Windows does not like this:
         # run: ${STACK_BUILD} --only-dependencies
@@ -102,10 +101,14 @@ jobs:
       - name: Mac package.
         if: runner.os == 'macOS'
         run: |
-          mkdir -p tmp/usr/local/bin
           export AGDA2LAGDA_EXE=$(stack path --local-install-root ${{ env.STACK_FLAGS }})/bin/agda2lagda
           export AGDA2LAGDA_VERSION=$(${AGDA2LAGDA_EXE} --numeric-version)
-          export AGDA2LAGDA_PKG=AGDA2LAGDA-${AGDA2LAGDA_VERSION}-mac.pkg
+          export AGDA2LAGDA_BIN=agda2lagda-${AGDA2LAGDA_VERSION}-mac.binary
+          export AGDA2LAGDA_PKG=agda2lagda-${AGDA2LAGDA_VERSION}-mac.pkg
+          # Raw Mac binary
+          cp -p ${AGDA2LAGDA_EXE} ${AGDA2LAGDA_BIN}
+          # Build Mac package
+          mkdir -p tmp/usr/local/bin
           cp -p ${AGDA2LAGDA_EXE} tmp/usr/local/bin/agda2lagda
           pkgbuild \
             --root tmp \
@@ -114,3 +117,17 @@ jobs:
             --install-location / \
             --ownership recommended \
             ${AGDA2LAGDA_PKG}
+          # Save env variables for the next step
+          echo "AGDA2LAGDA_BIN=${AGDA2LAGDA_BIN}" >> ${GITHUB_ENV}
+          echo "AGDA2LAGDA_PKG=${AGDA2LAGDA_PKG}" >> ${GITHUB_ENV}
+
+      - name: Mac release.
+        if: runner.os == 'macOS'
+        # && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Test release
+          tag_name: v0.0.0
+          files: |
+            ${{ env.AGDA2LAGDA_BIN }}
+            ${{ env.AGDA2LAGDA_PKG }}
