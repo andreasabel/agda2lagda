@@ -21,18 +21,21 @@ jobs:
         os: [ubuntu-latest]
         include:
           - os: macOS-latest
-            ghc: 8.10.7
+            ghc: latest
           - os: windows-latest
-            ghc: 8.10.7
+            ghc: latest
 
-    env:
-      STACK_FLAGS: --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
-      # STACK_BUILD: stack build ${{ STACK_FLAGS }}  ## invalid
-      # STACK_BUILD: stack build ${{ env.STACK_FLAGS }}  ## also invalid
-      STACK_BUILD: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
-
+    ## Cannot define STACK_FLAGS here since we depend on GHC_VER
     # env:
-    #   STACK_BUILD: "stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --system-ghc"
+    #   STACK_FLAGS: --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
+    #   # STACK_BUILD: stack build ${{ STACK_FLAGS }}  ## invalid
+    #   # STACK_BUILD: stack build ${{ env.STACK_FLAGS }}  ## also invalid
+    #   STACK_BUILD: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
+
+    # Needed for Windows to make piping (... >> ...) and evaluation ( $(...) ) work.
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@v2                   # latest (2020-12-21): v2.3.4
@@ -48,6 +51,7 @@ jobs:
           # stack-version: latest
 
       - name: Info about the setup
+        shell: bash
         run: |
           echo "runner.os   = ${{ runner.os }}"
           echo "ghc-path    = ${{ steps.haskell-setup.outputs.ghc-path    }}"
@@ -58,8 +62,19 @@ jobs:
           echo "cabal-exe   = ${{ steps.haskell-setup.outputs.cabal-exe   }}"
           echo "stack-exe   = ${{ steps.haskell-setup.outputs.stack-exe   }}"
           echo "stack-root  = ${{ steps.haskell-setup.outputs.stack-root  }}"
-          echo "STACK_FLAGS = ${{ env.STACK_FLAGS }}"
-          echo "STACK_BUILD = ${{ env.STACK_BUILD }}"
+          echo "STACK_VER=$(stack --numeric-version)" >> ${GITHUB_ENV}
+          echo "GHC_VER=$(ghc --numeric-version)" >> ${GITHUB_ENV}
+
+      - name: Haskell versions
+        shell: bash
+        run: |
+          echo "GHC_VER     = ${{ env.GHC_VER   }}"
+          echo "STACK_VER   = ${{ env.STACK_VER }}"
+          echo "STACK_FLAGS=--stack-yaml stack-${{ env.GHC_VER }}.yaml --system-ghc --no-terminal --color always" >> ${GITHUB_ENV}
+
+        ## Would need a third `run` section
+        # echo "STACK_FLAGS = ${{ env.STACK_FLAGS }}"
+        # echo "STACK_BUILD = ${{ env.STACK_BUILD }}"
 
       - name: Cache dependencies
         # if:   runner.os == 'Linux'
@@ -67,7 +82,7 @@ jobs:
         with:
           path: ${{ steps.haskell-setup.outputs.stack-root }}
           # A unique cache is used for each stack.yaml.
-          key: ${{ runner.os }}-${{ steps.haskell-setup.outputs.stack-root }}-${{ hashFiles(format('stack-{0}.yaml', matrix.ghc)) }}
+          key: ${{ runner.os }}-${{ env.STACK_VER }}-${{ hashFiles(format('stack-{0}.yaml', env.GHC_VER)) }}
         ## DOESN'T WORK:
         # # For brevity of notation (rather than for using the environment variable), let
         # #   env.stack-root = steps.haskell-setup.outputs.stack-root
@@ -82,17 +97,17 @@ jobs:
 
       - name: Build dependencies.
         # run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --only-dependencies
-        run: ${{ env.STACK_BUILD }} --only-dependencies
+        run: stack build ${{ env.STACK_FLAGS }} --only-dependencies
         # Windows does not like this:
         # run: ${STACK_BUILD} --only-dependencies
           # --test
 
       - name: Build agda2lagda w/o tests.
-        run: ${{ env.STACK_BUILD }}
+        run: stack build ${{ env.STACK_FLAGS }}
           #  --copy-bins
 
       - name: Build agda2lagda and run tests.
-        run: ${{ env.STACK_BUILD }} --test
+        run: stack build ${{ env.STACK_FLAGS }} --test
         if: matrix.ghc != '8.4.4' && matrix.ghc != '8.2.2' && matrix.ghc != '8.0.2'
         # Fall back to string comparison as version-comparison does not seem to work.
         # Simply exclude the versions that do not support
@@ -120,8 +135,6 @@ jobs:
           && matrix.ghc == '9.0.1'
         uses: softprops/action-gh-release@v1
         with:
-          name: Test release
-          tag_name: v0.0.0
           draft: true
           prerelease: true
           files: |
@@ -145,8 +158,8 @@ jobs:
           && runner.os == 'Linux'
         uses: softprops/action-gh-release@v1
         with:
-          name: Test release
-          tag_name: v0.0.0
+          draft: true
+          prerelease: true
           files: |
             ${{ env.AGDA2LAGDA_BIN }}
 
@@ -181,8 +194,8 @@ jobs:
           && runner.os == 'macOS'
         uses: softprops/action-gh-release@v1
         with:
-          name: Test release
-          tag_name: v0.0.0
+          draft: true
+          prerelease: true
           files: |
             ${{ env.AGDA2LAGDA_BIN }}
             ${{ env.AGDA2LAGDA_PKG }}
@@ -207,7 +220,7 @@ jobs:
           && runner.os == 'Windows'
         uses: softprops/action-gh-release@v1
         with:
-          name: Test release
-          tag_name: v0.0.0
+          draft: true
+          prerelease: true
           files: |
             ${{ env.AGDA2LAGDA_VER_EXE }}
