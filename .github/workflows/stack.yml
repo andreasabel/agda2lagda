@@ -60,6 +60,13 @@ jobs:
           echo "stack-root  = ${{ steps.haskell-setup.outputs.stack-root  }}"
           echo "STACK_FLAGS = ${{ env.STACK_FLAGS }}"
           echo "STACK_BUILD = ${{ env.STACK_BUILD }}"
+          echo "STACK_VER=$(stack --numeric-version)" >> ${GITHUB_ENV}
+          echo "GHC_VER=$(ghc --numeric-version)" >> ${GITHUB_ENV}
+
+      - name: Haskell versions
+        run: |
+          echo "GHC_VER     = ${{ env.GHC_VER   }}"
+          echo "STACK_VER   = ${{ env.STACK_VER }}"
 
       - name: Cache dependencies
         # if:   runner.os == 'Linux'
@@ -67,7 +74,7 @@ jobs:
         with:
           path: ${{ steps.haskell-setup.outputs.stack-root }}
           # A unique cache is used for each stack.yaml.
-          key: ${{ runner.os }}-${{ steps.haskell-setup.outputs.stack-root }}-${{ hashFiles(format('stack-{0}.yaml', matrix.ghc)) }}
+          key: ${{ runner.os }}-${{ env.STACK_VER }}-${{ hashFiles(format('stack-{0}.yaml', env.GHC_VER)) }}
         ## DOESN'T WORK:
         # # For brevity of notation (rather than for using the environment variable), let
         # #   env.stack-root = steps.haskell-setup.outputs.stack-root
