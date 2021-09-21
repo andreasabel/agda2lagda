@@ -32,6 +32,11 @@ jobs:
     #   # STACK_BUILD: stack build ${{ env.STACK_FLAGS }}  ## also invalid
     #   STACK_BUILD: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
 
+    # Needed for Windows to make piping (... >> ...) and evaluation ( $(...) ) work.
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - uses: actions/checkout@v2                   # latest (2020-12-21): v2.3.4
 
