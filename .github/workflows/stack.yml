@@ -120,8 +120,6 @@ jobs:
           && matrix.ghc == '9.0.1'
         uses: softprops/action-gh-release@v1
         with:
-          name: Test release
-          tag_name: v0.0.0
           draft: true
           prerelease: true
           files: |
@@ -145,8 +143,8 @@ jobs:
           && runner.os == 'Linux'
         uses: softprops/action-gh-release@v1
         with:
-          name: Test release
-          tag_name: v0.0.0
+          draft: true
+          prerelease: true
           files: |
             ${{ env.AGDA2LAGDA_BIN }}
 
@@ -181,8 +179,8 @@ jobs:
           && runner.os == 'macOS'
         uses: softprops/action-gh-release@v1
         with:
-          name: Test release
-          tag_name: v0.0.0
+          draft: true
+          prerelease: true
           files: |
             ${{ env.AGDA2LAGDA_BIN }}
             ${{ env.AGDA2LAGDA_PKG }}
@@ -207,7 +205,7 @@ jobs:
           && runner.os == 'Windows'
         uses: softprops/action-gh-release@v1
         with:
-          name: Test release
-          tag_name: v0.0.0
+          draft: true
+          prerelease: true
           files: |
             ${{ env.AGDA2LAGDA_VER_EXE }}
