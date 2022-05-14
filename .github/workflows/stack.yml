@@ -7,7 +7,7 @@ on:
     branches: [ master, ci-* ]
     tags:     [ v* ]
   pull_request:
-    types: [ opened, synchronize]
+    types: [ opened, synchronize ]
 
 jobs:
   build:
@@ -70,6 +70,7 @@ jobs:
         run: |
           echo "GHC_VER     = ${{ env.GHC_VER   }}"
           echo "STACK_VER   = ${{ env.STACK_VER }}"
+          echo "STACK_YAML=stack-${{ env.GHC_VER }}.yaml" >> ${GITHUB_ENV}
           echo "STACK_FLAGS=--stack-yaml stack-${{ env.GHC_VER }}.yaml --system-ghc --no-terminal --color always" >> ${GITHUB_ENV}
 
         ## Would need a third `run` section
@@ -80,9 +81,16 @@ jobs:
         # if:   runner.os == 'Linux'
         uses: actions/cache@v2                      # latest (2020-12-21): v2.1.3
         with:
-          path: ${{ steps.haskell-setup.outputs.stack-root }}
+          path: |
+            ${{ steps.haskell-setup.outputs.stack-root }}
+            .stack-work
           # A unique cache is used for each stack.yaml.
-          key: ${{ runner.os }}-${{ env.STACK_VER }}-${{ hashFiles(format('stack-{0}.yaml', env.GHC_VER)) }}
+          key: ${{ runner.os }}-stack-${{ env.GHC_VER }}-${{ env.STACK_VER }}-${{ hashFiles(env.STACK_YAML) }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-stack-${{ env.GHC_VER }}-${{ env.STACK_VER }}-${{ hashFiles(env.STACK_YAML) }}-
+            ${{ runner.os }}-stack-${{ env.GHC_VER }}-${{ env.STACK_VER }}-
+            ${{ runner.os }}-stack-${{ env.GHC_VER }}-
+            ${{ runner.os }}-stack-
         ## DOESN'T WORK:
         # # For brevity of notation (rather than for using the environment variable), let
         # #   env.stack-root = steps.haskell-setup.outputs.stack-root
