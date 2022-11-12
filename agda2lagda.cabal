@@ -54,6 +54,7 @@ executable agda2lagda
 
   other-modules:       LexicalStructure
                        Markup
+                       Options
                        Render
                        Util
                        Version

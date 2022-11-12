@@ -7,6 +7,7 @@ import Data.Char      as X (isSpace)
 import Data.Function  as X (on)
 import Data.List      as X (dropWhileEnd, groupBy)
 import Data.Maybe     as X
+import Data.Semigroup as X
 
 (<&>) :: Functor f => f a -> (a -> b) -> f b
 (<&>) = flip (<$>)
