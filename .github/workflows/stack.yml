@@ -90,7 +90,9 @@ jobs:
             ${{ runner.os }}-stack-${{ env.GHC_VER }}-${{ env.STACK_VER }}-${{ hashFiles(env.STACK_YAML) }}-
             ${{ runner.os }}-stack-${{ env.GHC_VER }}-${{ env.STACK_VER }}-
             ${{ runner.os }}-stack-${{ env.GHC_VER }}-
-            ${{ runner.os }}-stack-
+            # https://github.com/commercialhaskell/stack/issues/5866
+            # Don't restore cached builds from older GHC versions:
+            # ${{ runner.os }}-stack-
         ## DOESN'T WORK:
         # # For brevity of notation (rather than for using the environment variable), let
         # #   env.stack-root = steps.haskell-setup.outputs.stack-root
