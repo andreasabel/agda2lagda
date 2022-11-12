@@ -5,6 +5,7 @@
 
 module Markup
   ( markup, Item(..), TextItem(..)
+  , gobbleTrailingBlockCommentClosers
   ) where
 
 import Util

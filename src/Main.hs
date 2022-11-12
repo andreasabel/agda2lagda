@@ -27,7 +27,7 @@ main = do
   -- Parse options.
 
   opts@Options{..} <- options
-  target <- getTarget opts
+  target@(language, format, mout) <- getTarget opts
   chat opts $ vocalizeOptions opts target
 
   -- Parse input.
@@ -37,12 +37,14 @@ main = do
 
   -- Generate output.
 
-  let result = lagdaTex items
+  let result = case format of
+        LaTeX    -> lagdaTex items
+        Markdown -> lagdaMd language items
 
   -- Save to file or print to stdout.
 
   chat opts $ "Writing output...\n"
-  case target of
+  case mout of
     Nothing      -> putStr result
     Just outFile -> do
 

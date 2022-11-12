@@ -3,7 +3,7 @@
 module Util (module Util, module X) where
 
 import Data.Bifunctor as X
-import Data.Char      as X (isSpace)
+import Data.Char      as X (isSpace, toLower)
 import Data.Function  as X (on)
 import Data.List      as X (dropWhileEnd, groupBy)
 import Data.Maybe     as X

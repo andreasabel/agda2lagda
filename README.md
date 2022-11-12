@@ -6,10 +6,13 @@
 
 
 
-agda2lagda: Convert Agda/Haskell text to literate Agda/Haskell text
-===================================================================
+agda2lagda: Convert program to literate program (Agda/Haskell)
+==============================================================
 
-Generate a LaTeX literate Agda/Haskell script from an Agda/Haskell script.
+Generate a literate Agda/Haskell script from an Agda/Haskell script.
+Produces LaTeX or Markdown literate scripts.
+
+Conversion into LaTeX (default):
 
 - Single line comments are turned into ordinary LaTeX.
   * Paragraphs followed by a line of equal signs are turned into `\heading`s.
@@ -22,6 +25,17 @@ Generate a LaTeX literate Agda/Haskell script from an Agda/Haskell script.
   Nested comments are not recognized.
 
 - The rest is interpreted as code and wrapped in a `code` environment.
+
+Conversion into Markdown (option `--markdown`):
+
+- Single line comments are turned into ordinary text.
+  * At the end of the file, extra block comment terminators are removed.
+
+- Comment blocks, if started on the 0th column, count as _commenting out_.
+  These will be turned into HTML comments.
+  Nested comments are not recognized.
+
+- The rest is interpreted as code and wrapped in a code environment (triple backticks).
 
 Examples (rendered):
 - http://www.cse.chalmers.se/~abela/#MultiSortedAlgebra
@@ -136,7 +150,7 @@ Bye.
 
 These are standard installation instructions.
 
-Last update of installation instructions: 2021-05-29.
+Last update of installation instructions: 2022-11-12.
 
 ### From stackage.org
 
@@ -162,9 +176,9 @@ cd agda2lagda
 cabal install
 ```
 Alternatively to the last line, you can use `stack`.
-E.g. if you have GHC 8.10.2 installed, you can use this compiler as follows:
+E.g. if you have GHC 8.10.7 installed, you can use this compiler as follows:
 ```
-stack install --system-ghc --stack-yaml stack-8.10.2.yaml
+stack install --system-ghc --stack-yaml stack-8.10.7.yaml
 ```
 Alternatively, `stack` can install the compiler for you:
 ```
@@ -173,5 +187,5 @@ stack install --stack-yaml stack-xx.yy.zz.yaml
 The `xx.yy.zz` is a placeholder for the GHC version,
 choose one (for which there is a `.yaml` file).
 
-At the time of writing, installation with these GHC versions has been tested:
-8.0.2, 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.4, 9.0.1.
+At the time of writing, installation with these GHC versions have been tested:
+8.0.2, 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.7, 9.0.2, 9.2.4.

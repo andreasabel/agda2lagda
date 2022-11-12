@@ -1,6 +1,9 @@
 module Options
   ( Options(..)
   , options
+  , Format(..)
+  , Language(..)
+  , languageToHighlighter
   , getTarget
   , self
   , vocalizeOptions
@@ -22,11 +25,31 @@ import Version
 self :: String
 self = "agda2lagda"
 
-extensionMap :: [(String,String)]
+extensionMap :: [(String,(Language,[(Format,String)]))]
 extensionMap =
-  [ (".agda" , ".lagda.tex")
-  , (".hs"   , ".lhs")
+  [ (".agda" , (Agda    , [ (LaTeX    , ".lagda.tex")
+                          , (Markdown , ".lagda.md" ) ]))
+  , (".hs"   , (Haskell , [ (LaTeX    , ".lhs"      )
+                          , (Markdown , ".lhs"      ) ]))
   ]
+
+-- | Format of the output.
+data Format
+  = LaTeX    -- ^ Latex literate text.
+  | Markdown -- ^ Markdown literate text.
+  deriving (Eq, Show)
+
+-- formatToLongOption :: Format -> String
+-- formatToLongOption = map toLower . show
+
+data Language
+  = Agda
+  | Haskell
+  deriving (Eq, Show)
+
+-- | Get markdown highlighter identifier (e.g. "agda", "haskell") for language.
+languageToHighlighter :: Language -> String
+languageToHighlighter = map toLower . show
 
 -- * Option parsing and handling
 
@@ -34,6 +57,9 @@ data Options = Options
   { optVerbose    :: Bool
   , optDryRun     :: Bool
   , optForce      :: Bool
+  , optFormat     :: Format
+  -- , optLatex      :: Bool
+  -- , optMarkdown   :: Bool
   , optOutput     :: Maybe FilePath
   , optInput      :: Maybe FilePath
   } deriving Show
@@ -68,6 +94,7 @@ options =
     <$> oVerbose
     <*> oDryRun
     <*> oForce
+    <*> oFormat
     <*> oOutput
     <*> (oStdin <|> oInput)
 
@@ -89,6 +116,30 @@ options =
       <> short 'v'
       <> hidden
       <> help "Comment on what is happening."
+
+  oFormat =
+    flag LaTeX Markdown
+      $  long "markdown"
+      <> help "Produce Markdown instead of LaTeX."
+
+  -- oLaTeX =
+  --   switch
+  --     $  long (formatToLongOption LaTeX)
+  --     <> help (concat ["Generate LaTeX (default if --", formatToLongOption Markdown, " is not given)."])
+
+  -- oMarkdown =
+  --   switch
+  --     $  long (formatToLongOption Markdown)
+  --     <> help "Generate Markdown (possibly inferred from OUT file extension)."
+
+  -- oLaTeX =
+  --   optional $ strOption
+  --     $  long "latex"
+  --     <> value ""
+  --     <> noArgError (ShowHelpText Nothing)
+  --     <> metavar "LATEXFILE"
+  --     <> action "file"
+  --     <> help "Generate LaTeX (if LATEXFILE is not given, it is computed from INFILE and OUT)."
 
   oOutput =
     optional $ strOption
@@ -118,8 +169,11 @@ options =
   foot = vcat $ map text $ concat
     [ [ "Unless explicitly given via -o, the name of the output file is computed by replacing the extension of the input file, according to the following rules:"
       , "" ]
-    , flip map extensionMap $ \ (src, tgt) ->
-        List.intercalate "\t" [ "", src, "-->", tgt ]
+    , extensionMap >>= \ (src, (_language, rest)) ->
+        rest <&> \ (format, tgt) ->
+        -- let o = "--" ++ formatToLongOption format ++ ":" in
+        let o = show format in
+        List.intercalate "\t" [ "", src, "--" ++ o  ++ "-->", tgt ]
     , [ ""
       , "If the path OUT given via -o is a directory, that's where the output file will be placed."
       , ""
@@ -138,16 +192,16 @@ options =
       ]
     ]
 
-type Target = Maybe FilePath
+type Target = (Language, Format, Maybe FilePath)
 
 vocalizeOptions :: Options -> Target -> String
-vocalizeOptions Options{..} target = unlines $ map concat
+vocalizeOptions Options{..} (language, format, target) = unlines $ map concat
   [ [ "Plan:" ]
-  , [ "- Read from "
+  , [ "- Read " ++ show language ++ " code from "
     , maybe "standard input" ("file " ++) optInput
     , "."
     ]
-  , [ "- Write to "
+  , [ "- Write " ++ show format ++ " to "
     , maybe "standard output" (\ f -> "file " ++ f ++ unlessNewer) target
     , "."
     ]
@@ -158,19 +212,26 @@ vocalizeOptions Options{..} target = unlines $ map concat
     | otherwise = " (only if output is not newer than input)"
 
 getTarget :: Options -> IO Target
-getTarget Options{..}
-  | optDryRun = return Nothing
-  | otherwise = traverse dirOrFile optOutput <&> \ mout ->
-      if | Just (File out) <- mout -> Just out
-         | Just inp <- optInput    ->
-             case splitExtension inp of
-               (base, src) | Just tgt <- lookup src extensionMap
-                 -> Just $ addDir mout $ addExtension base tgt
-               _ -> Nothing
+getTarget Options{..} = do
+  let language = maybe Agda fst m
+  outFile <- if optDryRun then return Nothing else do
+    traverse dirOrFile optOutput <&> \ mout ->
+      if | Just (File out) <- mout    -> Just out
+         | Just (_, (base, tgt)) <- m -> Just $ addDir mout $ addExtension base tgt
          | otherwise -> Nothing
-      where
-      addDir (Just (Dir dir)) = (dir </>) . takeFileName
-      addDir _ = id
+  return (language, optFormat, outFile)
+  where
+    -- Resolve Language, basename, and extension from input file.
+    m :: Maybe (Language, (FilePath, FilePath))
+    m = do
+      inp <- optInput
+      let (base, src) = splitExtension inp
+      (language, rest) <- lookup src extensionMap
+      ext <- lookup optFormat rest
+      Just (language, (base, ext))
+
+    addDir (Just (Dir dir)) = (dir </>) . takeFileName
+    addDir _ = id
 
 data DirOrFile = Dir FilePath | File FilePath
 
