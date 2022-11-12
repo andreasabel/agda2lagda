@@ -49,6 +49,7 @@ options =
   versionOption =
     infoOption (unwords versionWords)
       $  long "version"
+      <> hidden
       <> help "Show version info."
   versionWords = concat
     [ [ self, "version", version ]
@@ -58,6 +59,7 @@ options =
   numericVersionOption =
     infoOption version
       $  long "numeric-version"
+      <> hidden
       <> help "Show just version number."
       -- Newline at the end:
       -- <> helpDoc (Just $ text "Show just version number." <$$> text "")
@@ -78,12 +80,14 @@ options =
   oDryRun =
     switch
       $  long "dry-run"
+      <> hidden
       <> help "Do not write any output files, write to standard output."
 
   oVerbose =
     switch
       $  long "verbose"
       <> short 'v'
+      <> hidden
       <> help "Comment on what is happening."
 
   oOutput =
