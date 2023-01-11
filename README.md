@@ -150,7 +150,7 @@ Bye.
 
 These are standard installation instructions.
 
-Last update of installation instructions: 2022-11-12.
+Last update of installation instructions: 2023-01-11.
 
 ### From stackage.org
 
@@ -187,5 +187,5 @@ stack install --stack-yaml stack-xx.yy.zz.yaml
 The `xx.yy.zz` is a placeholder for the GHC version,
 choose one (for which there is a `.yaml` file).
 
-At the time of writing, installation with these GHC versions have been tested:
-8.0.2, 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.7, 9.0.2, 9.2.4.
+At the time of writing, installation with these GHC versions has been tested:
+8.0.2, 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.7, 9.0.2, 9.2.5, 9.4.4.
