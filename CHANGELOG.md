@@ -1,5 +1,10 @@
 # Revision history for agda2lagda
 
+## 0.2023.1.12
+
+* New option `--markdown` producing `.lagda.md` files instead of `.lagda.tex`.
+* Tested with GHC 8.0.2 - 9.4.4.
+
 ## 0.2021.6.1
 
 * Paragraphs starting with `* ` are recognized as `\item` and

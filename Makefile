@@ -16,6 +16,9 @@ README.md : data/cpp.README.md $(expand-includes) Makefile
 test :
 	cabal test
 
+fix-tests:
+	cabal exec -- goldplate --fix test
+
 test-help:
 	cabal run agda2lagda -- --help
 
