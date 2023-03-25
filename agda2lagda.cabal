@@ -1,7 +1,7 @@
 cabal-version:       1.24
 
 name:                agda2lagda
-version:             0.2023.1.12
+version:             0.2023.3.25
 synopsis:            Translate .agda files into .lagda.tex files.
 
 description:         Simple command line tool to convert plain Agda
@@ -15,7 +15,7 @@ license-file:        LICENSE
 
 author:              Andreas Abel
 maintainer:          Andreas Abel <andreas.abel@cse.gu.se>
-copyright:           Andreas Abel, 2020, 2021, 2022
+copyright:           Andreas Abel, 2020-2023
 category:            Dependent types, Development
 
 build-type:          Simple
@@ -46,11 +46,6 @@ tested-with:
 source-repository head
   type:     git
   location: git://github.com/andreasabel/agda2lagda.git
-
-source-repository this
-  type:     git
-  location: git://github.com/andreasabel/agda2lagda.git
-  tag:      v0.2023.1.12
 
 executable agda2lagda
   main-is:             Main.hs

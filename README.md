@@ -87,7 +87,7 @@ Just download the executable for your platform there and put it in a directory t
 
 For example, under Linux (similar under macOS):
 ```shell
-VERSION="0.2023.1.12"
+VERSION="0.2023.3.25"
 SRC="https://github.com/andreasabel/agda2lagda/releases/download/v${VERSION}/agda2lagda-${VERSION}-linux.binary"
 TGT="/usr/local/bin/agda2lagda"
 wget ${SRC} -O ${TGT}
@@ -95,7 +95,7 @@ chmod +x ${TGT}
 ```
 For macOS, there is also a installer package, e.g.:
 ```shell
-VERSION="0.2023.1.12"
+VERSION="0.2023.3.25"
 SRC="https://github.com/andreasabel/agda2lagda/releases/download/v${VERSION}/agda2lagda-${VERSION}-mac.pkg"
 TGT="/tmp/agda2lagda.pkg"
 wget ${SRC} -O ${TGT}
@@ -106,7 +106,7 @@ Verify the installation with these commands (Linux/macOS):
 $ which agda2lagda
 /usr/local/bin/agda2lagda
 $ agda2lagda --version
-agda2lagda version 0.2023.1.12
+agda2lagda version 0.2023.3.25
 ```
 
 Installation from source
