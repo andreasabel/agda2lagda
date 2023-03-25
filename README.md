@@ -114,14 +114,14 @@ Installation from source
 
 These are standard installation instructions.
 
-Last update of installation instructions: 2023-01-11.
+Last update of installation instructions: 2023-03-25.
 
 ### From stackage.org
 
 Requires [stack](https://docs.haskellstack.org/en/stable/install_and_upgrade/).
 ```
 stack update
-stack install agda2lagda
+stack install agda2lagda --resolver nightly
 ```
 
 ### From hackage.haskell.org
@@ -152,4 +152,4 @@ The `xx.yy.zz` is a placeholder for the GHC version,
 choose one (for which there is a `.yaml` file).
 
 At the time of writing, installation with these GHC versions has been tested:
-8.0.2, 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.7, 9.0.2, 9.2.5, 9.4.4.
+8.0.2, 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.7, 9.0.2, 9.2.7, 9.4.4.
