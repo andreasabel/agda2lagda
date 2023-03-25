@@ -75,6 +75,7 @@ options =
   versionOption =
     infoOption (unwords versionWords)
       $  long "version"
+      <> short 'V'
       <> hidden
       <> help "Show version info."
   versionWords = concat
