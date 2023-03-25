@@ -22,6 +22,8 @@ import System.FilePath
 import Util
 import Version
 
+-- import Debug.Trace (traceShowId)
+
 self :: String
 self = "agda2lagda"
 
@@ -32,6 +34,22 @@ extensionMap =
   , (".hs"   , (Haskell , [ (LaTeX    , ".lhs"      )
                           , (Markdown , ".lhs"      ) ]))
   ]
+
+-- | Map extensions to formats.
+formatMap :: [(String, Format)]
+formatMap =
+  [ (".tex", LaTeX)
+  , (".md", Markdown)
+  , (".markdown", Markdown)
+  ]
+
+-- | From the name of the output file, determine the format.
+formatFromFilename :: String -> Maybe Format
+formatFromFilename file =
+  case filter (\ (ext, _) -> ext `List.isSuffixOf` file) formatMap of
+    -- Only determine format if we have exactly one hit
+    [ (_, fmt) ] -> Just fmt
+    _ -> Nothing
 
 -- | Format of the output.
 data Format
@@ -57,15 +75,24 @@ data Options = Options
   { optVerbose    :: Bool
   , optDryRun     :: Bool
   , optForce      :: Bool
-  , optFormat     :: Format
+  , optFormat     :: Maybe Format
   -- , optLatex      :: Bool
   -- , optMarkdown   :: Bool
   , optOutput     :: Maybe FilePath
   , optInput      :: Maybe FilePath
   } deriving Show
 
+inferFormatFromOutput :: Options -> Options
+inferFormatFromOutput opts
+  | Nothing <- optFormat opts, Just out <- optOutput opts = opts { optFormat = formatFromFilename out }
+  | otherwise = opts
+
+-- | Default format to 'LaTeX'.
+getFormat :: Options -> Format
+getFormat = fromMaybe LaTeX . optFormat
+
 options :: IO Options
-options =
+options = inferFormatFromOutput <$> do
   execParser $
     info (helper <*> versionOption <*> numericVersionOption <*> programOptions)
          (header "Translates Agda/Haskell text into literate Agda/Haskell text, turning line comments into ordinary text and code into TeX code blocks."
@@ -119,7 +146,7 @@ options =
       <> help "Comment on what is happening."
 
   oFormat =
-    flag LaTeX Markdown
+    flag Nothing (Just Markdown)
       $  long "markdown"
       <> help "Produce Markdown instead of LaTeX."
 
@@ -148,7 +175,7 @@ options =
       <> short 'o'
       <> metavar "OUT"
       <> action "directory"
-      <> help "Name of output file or directory."
+      <> help "Name of output file or directory.  Ending '.md' or '.markdown' determines Markdown output."
 
   oStdin =
     flag' Nothing
@@ -176,6 +203,7 @@ options =
         let o = show format in
         List.intercalate "\t" [ "", src, "--" ++ o  ++ "-->", tgt ]
     , [ ""
+      , "If the path OUT given via -o ends in '.md' or '.markdown', '--markdown' is assumed."
       , "If the path OUT given via -o is a directory, that's where the output file will be placed."
       , ""
       , unwords [ "Example:", self, "path/to/file.agda" ]
@@ -213,22 +241,23 @@ vocalizeOptions Options{..} (language, format, target) = unlines $ map concat
     | otherwise = " (only if output is not newer than input)"
 
 getTarget :: Options -> IO Target
-getTarget Options{..} = do
+getTarget opts@Options{..} = do
   let language = maybe Agda fst m
   outFile <- if optDryRun then return Nothing else do
     traverse dirOrFile optOutput <&> \ mout ->
       if | Just (File out) <- mout    -> Just out
          | Just (_, (base, tgt)) <- m -> Just $ addDir mout $ addExtension base tgt
          | otherwise -> Nothing
-  return (language, optFormat, outFile)
+  return (language, format, outFile)
   where
+    format = getFormat opts
     -- Resolve Language, basename, and extension from input file.
     m :: Maybe (Language, (FilePath, FilePath))
     m = do
       inp <- optInput
       let (base, src) = splitExtension inp
       (language, rest) <- lookup src extensionMap
-      ext <- lookup optFormat rest
+      ext <- lookup format rest
       Just (language, (base, ext))
 
     addDir (Just (Dir dir)) = (dir </>) . takeFileName

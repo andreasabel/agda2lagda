@@ -1,0 +1,11 @@
+{ "command"     : "agda2lagda"
+, "input_files" : "Foo.agda"
+, "arguments"   : ["--verbose", "--output", "tmp-golden/${GOLDPLATE_INPUT_NAME}.lagda.md", "${GOLDPLATE_INPUT_FILE}"]
+, "asserts"     :
+    [ { "exit_code"         : 0 }
+    , { "created_file"      : "tmp-golden/${GOLDPLATE_INPUT_NAME}.lagda.md"
+      , "contents"          : "golden/${GOLDPLATE_INPUT_NAME}.lagda.md"
+      }
+    , { "created_directory" : "tmp-golden" }
+    ]
+}
