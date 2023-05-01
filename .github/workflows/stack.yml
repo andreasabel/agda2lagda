@@ -17,15 +17,15 @@ jobs:
       fail-fast: false
       matrix:
         # Note: check release logic below when changing the matrix!
-        ghc: [9.4.4, 9.2.7, 9.0.2, 8.10.7, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
+        ghc: [9.4.5, 9.2.7, 9.0.2, 8.10.7, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
         os: [ubuntu-latest]
         include:
           - os: macOS-latest
-            ghc: 9.4.4
+            ghc: 9.4.5
           - os: windows-latest
-            ghc: 9.4.4
+            ghc: 9.4.5
 
-    ## Cannot define STACK_FLAGS here since we depend on GHC_VER
+    ## Cannot define STACK_FLAGS here since we depend on GHC_VERSION
     # env:
     #   STACK_FLAGS: --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
     #   # STACK_BUILD: stack build ${{ STACK_FLAGS }}  ## invalid
@@ -41,39 +41,36 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup Haskell
-        uses: haskell/actions/setup@v2
+        uses: haskell-actions/setup@v2
         id:   haskell-setup  # <-- self-chosen identifier
         with:
           ghc-version: ${{ matrix.ghc }}
           enable-stack: true
-          # stack-version: latest
+          cabal-update: false
 
-      - name: Info about the setup
+      - name: Environment settings based on the setup
         shell: bash
         run: |
-          echo "runner.os   = ${{ runner.os }}"
-          echo "ghc-path    = ${{ steps.haskell-setup.outputs.ghc-path    }}"
-          echo "cabal-path  = ${{ steps.haskell-setup.outputs.cabal-path  }}"
-          echo "stack-path  = ${{ steps.haskell-setup.outputs.stack-path  }}"
-          echo "cabal-store = ${{ steps.haskell-setup.outputs.cabal-store }}"
-          echo "ghc-exe     = ${{ steps.haskell-setup.outputs.ghc-exe     }}"
-          echo "cabal-exe   = ${{ steps.haskell-setup.outputs.cabal-exe   }}"
-          echo "stack-exe   = ${{ steps.haskell-setup.outputs.stack-exe   }}"
-          echo "stack-root  = ${{ steps.haskell-setup.outputs.stack-root  }}"
-          echo "STACK_VER=$(stack --numeric-version)" >> "${GITHUB_ENV}"
-          echo "GHC_VER=$(ghc --numeric-version)" >> "${GITHUB_ENV}"
-
-      - name: Haskell versions
-        shell: bash
-        run: |
-          echo "GHC_VER     = ${{ env.GHC_VER   }}"
-          echo "STACK_VER   = ${{ env.STACK_VER }}"
-          echo "STACK_YAML=stack-${{ env.GHC_VER }}.yaml" >> "${GITHUB_ENV}"
-          echo "STACK_FLAGS=--stack-yaml stack-${{ env.GHC_VER }}.yaml --system-ghc --no-terminal --color always" >> "${GITHUB_ENV}"
-
-        ## Would need a third `run` section
-        # echo "STACK_FLAGS = ${{ env.STACK_FLAGS }}"
-        # echo "STACK_BUILD = ${{ env.STACK_BUILD }}"
+          echo "runner.os     = ${{ runner.os }}"
+          echo "ghc-version   = ${{ steps.haskell-setup.outputs.ghc-version   }}"
+          echo "cabal-version = ${{ steps.haskell-setup.outputs.cabal-version }}"
+          echo "stack-version = ${{ steps.haskell-setup.outputs.stack-version }}"
+          echo "ghc-path      = ${{ steps.haskell-setup.outputs.ghc-path      }}"
+          echo "cabal-path    = ${{ steps.haskell-setup.outputs.cabal-path    }}"
+          echo "stack-path    = ${{ steps.haskell-setup.outputs.stack-path    }}"
+          echo "ghc-exe       = ${{ steps.haskell-setup.outputs.ghc-exe       }}"
+          echo "cabal-exe     = ${{ steps.haskell-setup.outputs.cabal-exe     }}"
+          echo "stack-exe     = ${{ steps.haskell-setup.outputs.stack-exe     }}"
+          echo "cabal-store   = ${{ steps.haskell-setup.outputs.cabal-store   }}"
+          echo "stack-root    = ${{ steps.haskell-setup.outputs.stack-root    }}"
+          GHC_VERSION=${{ steps.haskell-setup.outputs.ghc-version }}
+          STACK_VERSION=${{ steps.haskell-setup.outputs.stack-version }}
+          STACK_YAML=stack-${GHC_VERSION}.yaml
+          STACK_FLAGS="--stack-yaml ${STACK_YAML} --system-ghc --no-terminal --color always"
+          echo "GHC_VERSION=${GHC_VERSION}"     >> "${GITHUB_ENV}"
+          echo "STACK_VERSION=${STACK_VERSION}" >> "${GITHUB_ENV}"
+          echo "STACK_YAML=${STACK_YAML}"       >> "${GITHUB_ENV}"
+          echo "STACK_FLAGS=${STACK_FLAGS}"     >> "${GITHUB_ENV}"
 
       - name: Cache dependencies
         # if:   runner.os == 'Linux'
@@ -83,11 +80,11 @@ jobs:
             ${{ steps.haskell-setup.outputs.stack-root }}
             .stack-work
           # A unique cache is used for each stack.yaml.
-          key: ${{ runner.os }}-stack-${{ env.GHC_VER }}-${{ env.STACK_VER }}-${{ hashFiles(env.STACK_YAML) }}-${{ github.sha }}
+          key: ${{ runner.os }}-stack-${{ env.GHC_VERSION }}-${{ env.STACK_VERSION }}-${{ hashFiles(env.STACK_YAML) }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-stack-${{ env.GHC_VER }}-${{ env.STACK_VER }}-${{ hashFiles(env.STACK_YAML) }}-
-            ${{ runner.os }}-stack-${{ env.GHC_VER }}-${{ env.STACK_VER }}-
-            ${{ runner.os }}-stack-${{ env.GHC_VER }}-
+            ${{ runner.os }}-stack-${{ env.GHC_VERSION }}-${{ env.STACK_VERSION }}-${{ hashFiles(env.STACK_YAML) }}-
+            ${{ runner.os }}-stack-${{ env.GHC_VERSION }}-${{ env.STACK_VERSION }}-
+            ${{ runner.os }}-stack-${{ env.GHC_VERSION }}-
             # https://github.com/commercialhaskell/stack/issues/5866
             # Don't restore cached builds from older GHC versions:
             # ${{ runner.os }}-stack-
@@ -132,7 +129,7 @@ jobs:
         # Conditional to ensure this deployment is only run once per action.
         if: >-
           startsWith(github.ref, 'refs/tags/v')
-          && matrix.ghc == '9.4.4'
+          && matrix.ghc == '9.4.5'
         run: |
           DIST_TGZ=$(cabal sdist | tail -1)
           echo "DIST_TGZ=${DIST_TGZ}" >> "${GITHUB_ENV}"
@@ -140,7 +137,7 @@ jobs:
       - name: Source tarball release.
         if: >-
           startsWith(github.ref, 'refs/tags/v')
-          && matrix.ghc == '9.4.4'
+          && matrix.ghc == '9.4.5'
         uses: softprops/action-gh-release@v1
         with:
           draft: true
@@ -217,10 +214,10 @@ jobs:
         run: |
           AGDA2LAGDA_EXE=$(stack path --local-install-root ${{ env.STACK_FLAGS }})/bin/agda2lagda
           AGDA2LAGDA_VERSION=$("${AGDA2LAGDA_EXE}" --numeric-version)
-          AGDA2LAGDA_VER_EXE=agda2lagda-${AGDA2LAGDA_VERSION}.exe
-          cp -p "${AGDA2LAGDA_EXE}.exe" "${AGDA2LAGDA_VER_EXE}"
+          AGDA2LAGDA_VERSION_EXE=agda2lagda-${AGDA2LAGDA_VERSION}.exe
+          cp -p "${AGDA2LAGDA_EXE}.exe" "${AGDA2LAGDA_VERSION_EXE}"
           # Save env variables for the next step
-          echo "AGDA2LAGDA_VER_EXE=${AGDA2LAGDA_VER_EXE}" >> "${GITHUB_ENV}"
+          echo "AGDA2LAGDA_VERSION_EXE=${AGDA2LAGDA_VERSION_EXE}" >> "${GITHUB_ENV}"
 
       - name: Windows release.
         if: >-
@@ -231,4 +228,4 @@ jobs:
           draft: true
           prerelease: true
           files: |
-            ${{ env.AGDA2LAGDA_VER_EXE }}
+            ${{ env.AGDA2LAGDA_VERSION_EXE }}
