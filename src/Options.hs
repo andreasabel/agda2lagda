@@ -13,7 +13,7 @@ module Options
 import qualified Data.List as List
 
 import Options.Applicative
-import Options.Applicative.Help.Pretty (vcat, text) -- , (<$$>))
+import Options.Applicative.Help.Pretty (vcat, pretty) -- , (<$$>))
 
 import System.Directory (doesDirectoryExist)
 import System.FilePath
@@ -116,7 +116,7 @@ options = inferFormatFromOutput <$> do
       <> hidden
       <> help "Show just version number."
       -- Newline at the end:
-      -- <> helpDoc (Just $ text "Show just version number." <$$> text "")
+      -- <> helpDoc (Just $ pretty "Show just version number." <$$> pretty "")
 
   programOptions = Options
     <$> oVerbose
@@ -194,7 +194,7 @@ options = inferFormatFromOutput <$> do
           "-"  -> Nothing
           file -> Just file
 
-  foot = vcat $ map text $ concat
+  foot = vcat $ map pretty $ concat
     [ [ "Unless explicitly given via -o, the name of the output file is computed by replacing the extension of the input file, according to the following rules:"
       , "" ]
     , extensionMap >>= \ (src, (_language, rest)) ->

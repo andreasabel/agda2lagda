@@ -1,5 +1,12 @@
 # Revision history for agda2lagda
 
+## 0.2023.6.9
+
+_West Pride revision._
+
+* Builds with `optparse-applicative-0.18`.
+* Tested with GHC 8.0.2 - 9.6.2.
+
 ## 0.2023.3.25
 
 * Output `-o` ending in `.md` or `.markdown` now activates `--markdown` format.
