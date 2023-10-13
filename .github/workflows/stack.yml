@@ -17,20 +17,18 @@ jobs:
       fail-fast: false
       matrix:
         # Note: check release logic below when changing the matrix!
-        ghc: [9.6.2, 9.4.5, 9.2.8, 9.0.2, 8.10.7, 8.8.4, 8.6.5, 8.4.4, 8.2.2, 8.0.2]
+        ghc: ['9.6', '9.4', '9.2.8', '9.0.2', '8.10.7', '8.8.4', '8.6.5', '8.4.4', '8.2.2', '8.0.2']
         os: [ubuntu-latest]
         include:
           - os: macOS-latest
-            ghc: 9.6.2
+            ghc: '9.6'
           - os: windows-latest
-            ghc: 9.6.2
-
-    ## Cannot define STACK_FLAGS here since we depend on GHC_VERSION
-    # env:
-    #   STACK_FLAGS: --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
-    #   # STACK_BUILD: stack build ${{ STACK_FLAGS }}  ## invalid
-    #   # STACK_BUILD: stack build ${{ env.STACK_FLAGS }}  ## also invalid
-    #   STACK_BUILD: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
+            ghc: '9.6'
+    env:
+      STACK_FLAGS: --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc
+      STACK_YAML: stack-${{ matrix.ghc }}.yaml
+      # STACK_BUILD: stack build ${{ STACK_FLAGS }}  ## invalid
+      # STACK_BUILD: stack build ${{ env.STACK_FLAGS }}  ## also invalid
 
     # Needed for Windows to make piping (... >> ...) and evaluation ( $(...) ) work.
     defaults:
@@ -38,7 +36,7 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Haskell
         uses: haskell-actions/setup@v2
@@ -65,12 +63,13 @@ jobs:
           echo "stack-root    = ${{ steps.haskell-setup.outputs.stack-root    }}"
           GHC_VERSION=${{ steps.haskell-setup.outputs.ghc-version }}
           STACK_VERSION=${{ steps.haskell-setup.outputs.stack-version }}
-          STACK_YAML=stack-${GHC_VERSION}.yaml
-          STACK_FLAGS="--stack-yaml ${STACK_YAML} --system-ghc --no-terminal --color always"
           echo "GHC_VERSION=${GHC_VERSION}"     >> "${GITHUB_ENV}"
           echo "STACK_VERSION=${STACK_VERSION}" >> "${GITHUB_ENV}"
-          echo "STACK_YAML=${STACK_YAML}"       >> "${GITHUB_ENV}"
-          echo "STACK_FLAGS=${STACK_FLAGS}"     >> "${GITHUB_ENV}"
+
+        # STACK_YAML=stack-${GHC_VERSION}.yaml
+        # STACK_FLAGS="--stack-yaml ${STACK_YAML} --system-ghc --no-terminal --color always"
+        # echo "STACK_YAML=${STACK_YAML}"       >> "${GITHUB_ENV}"
+        # echo "STACK_FLAGS=${STACK_FLAGS}"     >> "${GITHUB_ENV}"
 
       - name: Cache dependencies
         # if:   runner.os == 'Linux'
@@ -88,17 +87,6 @@ jobs:
             # https://github.com/commercialhaskell/stack/issues/5866
             # Don't restore cached builds from older GHC versions:
             # ${{ runner.os }}-stack-
-        ## DOESN'T WORK:
-        # # For brevity of notation (rather than for using the environment variable), let
-        # #   env.stack-root = steps.haskell-setup.outputs.stack-root
-        # env:
-        #   stack-root: ${{ steps.haskell-setup.outputs.stack-root }}
-        # with:
-        #   path: ${{ env.stack-root }}
-        #   # A unique cache is used for each stack.yaml.
-        #   key: ${{ runner.os }}-${{ env.stack-root }}-${{ hashFiles(format('stack-{0}.yaml', matrix.ghc)) }}
-          # runner.os is explained here:
-          # https://stackoverflow.com/questions/57946173/github-actions-run-step-on-specific-os
 
       - name: Build dependencies.
         # run: stack build --stack-yaml stack-${{ matrix.ghc }}.yaml --no-terminal --color always --system-ghc --only-dependencies
@@ -129,7 +117,7 @@ jobs:
         # Conditional to ensure this deployment is only run once per action.
         if: >-
           startsWith(github.ref, 'refs/tags/v')
-          && matrix.ghc == '9.6.2'
+          && matrix.ghc == '9.6'
         run: |
           DIST_TGZ=$(cabal sdist | tail -1)
           echo "DIST_TGZ=${DIST_TGZ}" >> "${GITHUB_ENV}"
@@ -137,7 +125,7 @@ jobs:
       - name: Source tarball release.
         if: >-
           startsWith(github.ref, 'refs/tags/v')
-          && matrix.ghc == '9.6.2'
+          && matrix.ghc == '9.6'
         uses: softprops/action-gh-release@v1
         with:
           draft: true
