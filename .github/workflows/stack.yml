@@ -126,7 +126,7 @@ jobs:
         if: >-
           startsWith(github.ref, 'refs/tags/v')
           && matrix.ghc == '9.6'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           prerelease: true
@@ -149,7 +149,7 @@ jobs:
         if: >-
           startsWith(github.ref, 'refs/tags/v')
           && runner.os == 'Linux'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           prerelease: true
@@ -185,7 +185,7 @@ jobs:
         if: >-
           startsWith(github.ref, 'refs/tags/v')
           && runner.os == 'macOS'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           prerelease: true
@@ -211,7 +211,7 @@ jobs:
         if: >-
           startsWith(github.ref, 'refs/tags/v')
           && runner.os == 'Windows'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           prerelease: true
