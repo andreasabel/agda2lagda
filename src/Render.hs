@@ -8,6 +8,8 @@ module Render
   , lagdaMd
   ) where
 
+import qualified Data.List.NonEmpty as List1
+
 import qualified LexicalStructure as L
 import Options (Language, languageToHighlighter)
 import Markup
@@ -35,12 +37,12 @@ lagdaTex its = unlines $ concat
 
 renderTex :: TextItem -> String
 renderTex = \case
-  Paragraph p -> unlines p
+  Paragraph p -> unlines $ List1.toList p
   Heading 1 s -> "\\heading{" ++ s ++ "}\n"
   Heading 2 s -> "\\subheading{" ++ s ++ "}\n"
   Itemize ps  -> unlines $ concat $
     [ [ "\\begin{itemize}\n" ]
-    , map (unlines . ("\\item" :)) ps
+    , map (unlines . ("\\item" :) . List1.toList) ps
     , [ "\\end{itemize}" ]
     ]
 
