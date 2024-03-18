@@ -8,6 +8,8 @@ module Markup
   , gobbleTrailingBlockCommentClosers
   ) where
 
+import qualified Data.List.NonEmpty as List1
+
 import Util
 import qualified LexicalStructure as L
 
@@ -40,33 +42,33 @@ markup = concatMap processText . gobbleTrailingBlockCommentClosers
       $ paragraphs s
 
 -- | A paragraph is a non-empty list of non-empty lines.
-type Paragraph = [String]
+type Paragraph = List1 String
 
 groupBullets :: [TextItem] -> [TextItem]
-groupBullets = map joinItems . groupBy (\ a b -> all (isJust . isItemize) [a,b])
+groupBullets = map joinItems . List1.groupBy (\ a b -> all (isJust . isItemize) [a,b])
   where
   isItemize = \case
     Itemize ps -> Just ps
     _ -> Nothing
-  joinItems :: [TextItem] -> TextItem
+  joinItems :: List1 TextItem -> TextItem
   joinItems is =
     -- In each group...
-    case mapMaybe isItemize is of
+    case mapMaybe isItemize $ List1.toList is of
       -- ...either it is not Itemize
-      []  -> head is
+      []  -> List1.head is
       -- or all are Itemize.
       pps -> Itemize $ concat pps
 
 -- | If the last line of a paragraph is just dashes or equal signs, we are a heading.
 
 detectMarkup :: Paragraph -> TextItem
-detectMarkup ls@(l1:ls1)
-  | Just s <- bulleted l1 = Itemize [s:ls1]
+detectMarkup ls@(l1 :| ls1)
+  | Just s <- bulleted l1 = Itemize [s :| ls1]
   | all (== '=') l0 = Heading 1 $ unwords $ map trimLeft ls0
   | all (== '-') l0 = Heading 2 $ unwords $ map trimLeft ls0
   | otherwise       = Paragraph ls
   where
-  (ls0, l) = initLast ls  -- safe!
+  (ls0, l) = initLast ls
   l0 = trimLeft l
 
 -- | If the line starts with @*@, return the rest.
@@ -81,7 +83,7 @@ bulleted l =
 --   Preserves indentation.
 
 paragraphs :: String -> [Paragraph]
-paragraphs = mapMaybe filterBlank . groupBy emptyOrNot . lines
+paragraphs = mapMaybe filterBlank . List1.groupBy emptyOrNot . lines
   where
   emptyLine  = null . trimLeft
   emptyOrNot = (==) `on` emptyLine
@@ -92,7 +94,7 @@ paragraphs = mapMaybe filterBlank . groupBy emptyOrNot . lines
 -- | Text lines at the end of file consisting solely of words "-}" are
 -- discarded, to accommodate for a hack that makes it easy to comment
 -- out everything to the end of the file.
--- https://github.com/agda/agda/issues/4953#issuecomment-702720296
+-- <https://github.com/agda/agda/issues/4953#issuecomment-702720296>
 
 gobbleTrailingBlockCommentClosers :: [L.Item] -> [L.Item]
 gobbleTrailingBlockCommentClosers = updateLast $ \case
