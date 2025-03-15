@@ -3,12 +3,16 @@
 *.log
 *.ptb
 .ghc.environment.*
+*~
+.DS_Store
 
 /dist/
 /dist-*/
 
 /.stack-work
 /stack*.yaml.lock
+
+/TAGS
 
 /test/out/
 /test/Foo-generated.lagda
