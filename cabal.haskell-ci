@@ -1,4 +1,4 @@
-branches: master ci*
+branches: master
 
 -- use ubuntu-22.04
 distribution: jammy
