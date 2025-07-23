@@ -1,3 +1,6 @@
-resolver: nightly-2025-03-15
+resolver: nightly-2025-07-23
 compiler: ghc-9.12.2
 compiler-check: match-exact
+
+extra-deps:
+- goldplate-0.2.2.1@rev:2

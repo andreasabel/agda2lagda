@@ -4,7 +4,7 @@ name: Stack build
 
 on:
   push:
-    branches: [ master, ci-* ]
+    branches: [ master ]
     tags:     [ v* ]
   pull_request:
     types: [ opened, synchronize ]
@@ -98,7 +98,7 @@ jobs:
 
       - name: Build agda2lagda and run tests.
         run: stack build ${{ env.STACK_FLAGS }} --test
-        if: matrix.ghc != '8.4.4' && matrix.ghc != '8.2.2'
+        if: matrix.ghc != '8.4.4'
         # Fall back to string comparison as version-comparison does not seem to work.
         # Simply exclude the versions that do not support
         # if: matrix.ghc >= 8.6  ## >= does not seem to work out-of-the-box for version
