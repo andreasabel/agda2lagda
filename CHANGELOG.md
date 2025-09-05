@@ -1,5 +1,10 @@
 # Revision history for agda2lagda
 
+## 0.2025.9.5
+
+* Fix `incomplete-patterns` warnings.
+* Tested with GHC 8.0.2 - 9.14 alpha1.
+
 ## 0.2023.6.9
 
 _West Pride revision._

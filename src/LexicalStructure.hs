@@ -56,6 +56,8 @@ pattern TextItem a = Item Text a
 -- | Commented out code from block comments.
 pattern CommItem a = Item Comment a
 
+{-# COMPLETE CodeItem, TextItem, CommItem #-}
+
 -- | Entry point for the parser of the lexical structure.
 
 parseItems

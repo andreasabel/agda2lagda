@@ -40,6 +40,7 @@ renderTex = \case
   Paragraph p -> unlines $ List1.toList p
   Heading 1 s -> "\\heading{" ++ s ++ "}\n"
   Heading 2 s -> "\\subheading{" ++ s ++ "}\n"
+  Heading _ _ -> error "Render.renderTex: headings are only supported of level 1 or 2"
   Itemize ps  -> unlines $ concat $
     [ [ "\\begin{itemize}\n" ]
     , map (unlines . ("\\item" :) . List1.toList) ps
