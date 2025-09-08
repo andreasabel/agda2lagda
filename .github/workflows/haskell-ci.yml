@@ -8,9 +8,9 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.19.20250821
+# version: 0.19.20250908
 #
-# REGENDATA ("0.19.20250821",["github","agda2lagda.cabal"])
+# REGENDATA ("0.19.20250908",["github","agda2lagda.cabal"])
 #
 name: Haskell-CI
 on:
@@ -219,7 +219,7 @@ jobs:
           chmod a+x $HOME/.cabal/bin/cabal-plan
           cabal-plan --version
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: source
       - name: initial cabal.project for sdist
