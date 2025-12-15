@@ -72,7 +72,7 @@ jobs:
       #   # echo "STACK_FLAGS=${STACK_FLAGS}"     >> "${GITHUB_ENV}"
 
       - name: Restore cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: cache
         env:
           key: ${{ runner.os }}-stack-${{ steps.haskell-setup.outputs.stack-version }}-ghc-${{ steps.haskell-setup.outputs.ghc-version }}
@@ -108,7 +108,7 @@ jobs:
         run: stack exec ${{ env.STACK_FLAGS }} agda2lagda -- --help
 
       - name: Cache dependencies
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: |
             ${{ steps.haskell-setup.outputs.stack-root }}
